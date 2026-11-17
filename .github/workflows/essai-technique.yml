@@ -12,14 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Lancer l'essai
         run: python3 essai/essai_technique.py
 
       - name: Garder les résultats bruts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: resultats-essai
           path: resultats-essai.json
