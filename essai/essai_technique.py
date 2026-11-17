@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-"""Flow Actu — essai technique (prototype jetable, cahier des charges § 6.3 et § 5).
+"""Flow Actu — essai technique n° 2 (prototype jetable).
 
-Mesure, sur des articles réels :
-  A. si chaque média (favoris + neutres) a un flux RSS trouvable automatiquement ;
-  B. combien d'articles de ces flux tombent dans chaque catégorie cochée par défaut
-     (classement par mots-clés) → quelles catégories ont besoin de Google ;
-  C. si on remonte d'un lien Google Actualités jusqu'à la vraie page de l'article ;
-  D. si le statut « payant / gratuit » est détectable (mention isAccessibleForFree) ;
-  E. si des sites bloquent la visite ;
-  F. si BFMTV et BFM Business partagent la même adresse.
+Suite de l'essai n° 1 (cahier des charges § 5 et § 6.3). Mesure :
+  A. les flux RSS des ~60 médias, avec des adresses connues pour ceux que
+     l'essai n° 1 n'avait pas trouvés ;
+  B. le rangement des articles par catégorie, avec les nouvelles règles
+     (titre seul, familles de médias, mots d'exclusion), avec 3 exemples
+     par catégorie pour juger la qualité ;
+  C. si Google Actualités complète bien les catégories trop pauvres ;
+  D. le repérage « payant / gratuit », sur un échantillon plus large
+     (2 articles par média), résumé média par média.
 
 Bibliothèque standard Python uniquement. Le rapport s'affiche dans le résumé
 du workflow GitHub (ou dans le terminal si lancé à la main).
 """
-import base64
 import json
 import os
 import re
@@ -25,133 +25,163 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from html import unescape
 
-UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-      "(KHTML, like Gecko) Chrome/131.0 Safari/537.36")
-PAUSE = 1.0  # secondes entre deux visites, par politesse
+# Le robot se présente honnêtement (nom + adresse du projet).
+UA = "Mozilla/5.0 (compatible; FlowActu/0.2; +https://github.com/flowPowa/flow-actu)"
+PAUSE = 1.0             # secondes entre deux visites, par politesse
+PAYWALL_PER_MEDIA = 2   # articles vérifiés par média pour le test « payant »
 
-# Médias favoris (F) et neutres (N) : (nom, page d'accueil, statut)
+# ------------------------------------------------------------------ médias
+# Familles : actu, local, tech, sciences, jeux, pop, creation, argent, quotidien, voyage
+# "*" = média généraliste (peut alimenter toutes les familles, sur le titre seul).
+# Pour un média spécialisé, la 1re famille est sa famille principale : tous ses
+# articles alimentent la catégorie large de cette famille.
+# "feeds" = adresses connues, essayées en premier (à vérifier par l'essai).
 MEDIAS = [
-    ("Ouest-France", "https://www.ouest-france.fr", "F"),
-    ("Mediapart", "https://www.mediapart.fr", "F"),
-    ("Courrier international", "https://www.courrierinternational.com", "F"),
-    ("Arte", "https://www.arte.tv/fr/", "F"),
-    ("Les Echos", "https://www.lesechos.fr", "F"),
-    ("Numerama", "https://www.numerama.com", "F"),
-    ("Frandroid", "https://www.frandroid.com", "F"),
-    ("Korben", "https://korben.info", "F"),
-    ("Écran Large", "https://www.ecranlarge.com", "F"),
-    ("developpez.com", "https://www.developpez.com", "F"),
-    ("Le Monde", "https://www.lemonde.fr", "N"),
-    ("Le Figaro", "https://www.lefigaro.fr", "N"),
-    ("Libération", "https://www.liberation.fr", "N"),
-    ("Le Parisien", "https://www.leparisien.fr", "N"),
-    ("franceinfo", "https://www.francetvinfo.fr", "N"),
-    ("20 Minutes", "https://www.20minutes.fr", "N"),
-    ("L'Humanité", "https://www.humanite.fr", "N"),
-    ("Le Point", "https://www.lepoint.fr", "N"),
-    ("L'Express", "https://www.lexpress.fr", "N"),
-    ("L'Obs", "https://www.nouvelobs.com", "N"),
-    ("Marianne", "https://www.marianne.net", "N"),
-    ("HuffPost", "https://www.huffingtonpost.fr", "N"),
-    ("LCI", "https://www.tf1info.fr", "N"),
-    ("France 24", "https://www.france24.com/fr/", "N"),
-    ("Europe 1", "https://www.europe1.fr", "N"),
-    ("RTL", "https://www.rtl.fr", "N"),
-    ("France Inter", "https://www.radiofrance.fr/franceinter", "N"),
-    ("RFI", "https://www.rfi.fr/fr/", "N"),
-    ("La Tribune", "https://www.latribune.fr", "N"),
-    ("Capital", "https://www.capital.fr", "N"),
-    ("Challenges", "https://www.challenges.fr", "N"),
-    ("Boursorama", "https://www.boursorama.com", "N"),
-    ("Investir", "https://investir.lesechos.fr", "N"),
-    ("BFM Business", "https://www.bfmtv.com/economie/", "N"),
-    ("Presse Océan", "https://www.presseocean.fr", "N"),
-    ("France 3 Pays de la Loire", "https://france3-regions.francetvinfo.fr/pays-de-la-loire", "N"),
-    ("Actu.fr Pays de la Loire", "https://actu.fr/pays-de-la-loire", "N"),
-    ("ici Loire Océan", "https://www.francebleu.fr/loire-ocean", "N"),
-    ("Le Télégramme", "https://www.letelegramme.fr", "N"),
-    ("Next", "https://next.ink", "N"),
-    ("01net", "https://www.01net.com", "N"),
-    ("Clubic", "https://www.clubic.com", "N"),
-    ("ZDNet", "https://www.zdnet.fr", "N"),
-    ("Le Monde Informatique", "https://www.lemondeinformatique.fr", "N"),
-    ("Journal du Geek", "https://www.journaldugeek.com", "N"),
-    ("Futura", "https://www.futura-sciences.com", "N"),
-    ("Sciences et Avenir", "https://www.sciencesetavenir.fr", "N"),
-    ("Ciel et Espace", "https://www.cieletespace.fr", "N"),
-    ("Pour la Science", "https://www.pourlascience.fr", "N"),
-    ("The Conversation", "https://theconversation.com/fr", "N"),
-    ("Gamekult", "https://www.gamekult.com", "N"),
-    ("Jeuxvideo.com", "https://www.jeuxvideo.com", "N"),
-    ("Gameblog", "https://www.gameblog.fr", "N"),
-    ("ActuGaming", "https://www.actugaming.net", "N"),
-    ("Millenium", "https://www.millenium.org", "N"),
-    ("AlloCiné", "https://www.allocine.fr", "N"),
-    ("Première", "https://www.premiere.fr", "N"),
-    ("Konbini", "https://www.konbini.com", "N"),
-    ("Télérama", "https://www.telerama.fr", "N"),
-    ("Les Inrocks", "https://www.lesinrocks.com", "N"),
-    ("Manga-News", "https://www.manga-news.com", "N"),
-    ("Nautiljon", "https://www.nautiljon.com", "N"),
+    # nom, page d'accueil, statut (F/N), familles, adresses de flux connues
+    ("Ouest-France", "https://www.ouest-france.fr", "F", ["*"], []),
+    ("Mediapart", "https://www.mediapart.fr", "F", ["*"], ["https://www.mediapart.fr/articles/feed"]),
+    ("Courrier international", "https://www.courrierinternational.com", "F", ["*"], []),
+    ("Arte", "https://www.arte.tv/fr/", "F", ["*"], ["https://www.arte.tv/fr/rss.xml"]),
+    ("Les Echos", "https://www.lesechos.fr", "F", ["argent", "actu", "tech"], [
+        "https://services.lesechos.fr/rss/les-echos-economie.xml",
+        "https://services.lesechos.fr/rss/les-echos-entreprises.xml",
+        "https://services.lesechos.fr/rss/les-echos-tech-medias.xml",
+        "https://services.lesechos.fr/rss/les-echos-finance-marches.xml",
+        "https://services.lesechos.fr/rss/les-echos-monde.xml",
+        "https://services.lesechos.fr/rss/les-echos-politique.xml"]),
+    ("Numerama", "https://www.numerama.com", "F", ["tech", "sciences", "pop", "jeux"], []),
+    ("Frandroid", "https://www.frandroid.com", "F", ["tech"], []),
+    ("Korben", "https://korben.info", "F", ["tech"], []),
+    ("Écran Large", "https://www.ecranlarge.com", "F", ["pop"], []),
+    ("developpez.com", "https://www.developpez.com", "F", ["tech"], []),
+    ("Le Monde", "https://www.lemonde.fr", "N", ["*"], []),
+    ("Le Figaro", "https://www.lefigaro.fr", "N", ["*"], ["https://www.lefigaro.fr/rss/figaro_actualites.xml"]),
+    ("Libération", "https://www.liberation.fr", "N", ["*"], ["https://www.liberation.fr/arc/outboundfeeds/rss-all/?outputType=xml"]),
+    ("Le Parisien", "https://www.leparisien.fr", "N", ["*"], ["https://feeds.leparisien.fr/leparisien/rss"]),
+    ("franceinfo", "https://www.francetvinfo.fr", "N", ["*"], ["https://www.francetvinfo.fr/titres.rss"]),
+    ("20 Minutes", "https://www.20minutes.fr", "N", ["*"], []),
+    ("L'Humanité", "https://www.humanite.fr", "N", ["*"], []),
+    ("Le Point", "https://www.lepoint.fr", "N", ["*"], ["https://www.lepoint.fr/24h-infos/rss.xml"]),
+    ("L'Express", "https://www.lexpress.fr", "N", ["*"], []),
+    ("L'Obs", "https://www.nouvelobs.com", "N", ["*"], []),
+    ("Marianne", "https://www.marianne.net", "N", ["*"], ["https://www.marianne.net/rss.xml"]),
+    ("HuffPost", "https://www.huffingtonpost.fr", "N", ["*"], []),
+    ("LCI", "https://www.tf1info.fr", "N", ["*"], []),
+    ("France 24", "https://www.france24.com/fr/", "N", ["*"], []),
+    ("Europe 1", "https://www.europe1.fr", "N", ["*"], []),
+    ("RTL", "https://www.rtl.fr", "N", ["*"], ["https://www.rtl.fr/rss/une.xml"]),
+    ("France Inter", "https://www.radiofrance.fr/franceinter", "N", ["*"], []),
+    ("RFI", "https://www.rfi.fr/fr/", "N", ["*"], []),
+    ("The Conversation", "https://theconversation.com/fr", "N", ["*"], ["https://theconversation.com/fr/articles.atom"]),
+    ("La Tribune", "https://www.latribune.fr", "N", ["argent", "actu", "tech"], []),
+    ("Capital", "https://www.capital.fr", "N", ["argent", "actu"], []),
+    ("Challenges", "https://www.challenges.fr", "N", ["argent", "actu"], []),
+    ("Boursorama", "https://www.boursorama.com", "N", ["argent", "actu"], ["https://www.boursorama.com/rss/actualites/"]),
+    ("Investir", "https://investir.lesechos.fr", "N", ["argent"], ["https://investir.lesechos.fr/rss"]),
+    ("BFM Business", "https://www.bfmtv.com/economie/", "N", ["argent", "actu"], ["https://www.bfmtv.com/rss/economie/"]),
+    ("Presse Océan", "https://www.presseocean.fr", "N", ["local", "*"], ["https://www.presseocean.fr/rss.xml"]),
+    ("France 3 Pays de la Loire", "https://france3-regions.francetvinfo.fr/pays-de-la-loire", "N", ["local", "*"], []),
+    ("Actu.fr Pays de la Loire", "https://actu.fr/pays-de-la-loire", "N", ["local", "*"], []),
+    ("ici Loire Océan", "https://www.francebleu.fr/loire-ocean", "N", ["local", "*"], ["https://www.francebleu.fr/rss/loire-ocean.xml"]),
+    ("Le Télégramme", "https://www.letelegramme.fr", "N", ["local", "*"], ["https://www.letelegramme.fr/rss.xml"]),
+    ("Next", "https://next.ink", "N", ["tech"], []),
+    ("01net", "https://www.01net.com", "N", ["tech", "jeux"], []),
+    ("Clubic", "https://www.clubic.com", "N", ["tech", "jeux"], []),
+    ("ZDNet", "https://www.zdnet.fr", "N", ["tech"], []),
+    ("Le Monde Informatique", "https://www.lemondeinformatique.fr", "N", ["tech"], []),
+    ("Journal du Geek", "https://www.journaldugeek.com", "N", ["tech", "sciences", "pop", "jeux"], []),
+    ("Futura", "https://www.futura-sciences.com", "N", ["sciences", "quotidien"], []),
+    ("Sciences et Avenir", "https://www.sciencesetavenir.fr", "N", ["sciences", "actu"], []),
+    ("Ciel et Espace", "https://www.cieletespace.fr", "N", ["sciences"], []),
+    ("Pour la Science", "https://www.pourlascience.fr", "N", ["sciences"], []),
+    ("Gamekult", "https://www.gamekult.com", "N", ["jeux", "pop"], []),
+    ("Jeuxvideo.com", "https://www.jeuxvideo.com", "N", ["jeux", "pop"], ["https://www.jeuxvideo.com/rss/rss.xml"]),
+    ("Gameblog", "https://www.gameblog.fr", "N", ["jeux", "pop"], []),
+    ("ActuGaming", "https://www.actugaming.net", "N", ["jeux"], []),
+    ("Millenium", "https://www.millenium.org", "N", ["jeux"], ["https://www.millenium.org/rss"]),
+    ("AlloCiné", "https://www.allocine.fr", "N", ["pop"], ["http://rss.allocine.fr/ac/actualites/cine"]),
+    ("Première", "https://www.premiere.fr", "N", ["pop"], ["https://www.premiere.fr/rss/actu-live"]),
+    ("Konbini", "https://www.konbini.com", "N", ["pop", "creation"], ["https://www.konbini.com/fr/feed/"]),
+    ("Télérama", "https://www.telerama.fr", "N", ["pop", "creation", "actu"], []),
+    ("Les Inrocks", "https://www.lesinrocks.com", "N", ["pop", "creation"], ["https://www.lesinrocks.com/feed/"]),
+    ("Manga-News", "https://www.manga-news.com", "N", ["pop"], []),
+    ("Nautiljon", "https://www.nautiljon.com", "N", ["pop"], ["https://www.nautiljon.com/actualite/rss.php"]),
 ]
 
-# Médias testés via Google Actualités (décodage des liens + statut payant)
-GOOGLE_SITES = [
-    ("Le Monde", "lemonde.fr"), ("Le Figaro", "lefigaro.fr"),
-    ("Libération", "liberation.fr"), ("Le Parisien", "leparisien.fr"),
-    ("franceinfo", "francetvinfo.fr"), ("20 Minutes", "20minutes.fr"),
-    ("Le Point", "lepoint.fr"), ("L'Express", "lexpress.fr"),
-    ("Presse Océan", "presseocean.fr"), ("Gamekult", "gamekult.com"),
-]
+# --------------------------------------------------------------- catégories
+# Règles de mots-clés (comparaison sur le TITRE seul, sans accents ni majuscules) :
+#   "mot"        → le mot (ou l'expression) doit apparaître en entier ;
+#   "a+b"        → les deux doivent apparaître ;
+#   "re:..."     → expression régulière ;
+#   "spe:mot"    → ne compte que pour les médias spécialisés de la famille.
+# "not" : expressions qui annulent la correspondance.
+# "all_from_specialists" : catégorie large qui reçoit tous les articles des médias
+#   dont c'est la famille principale. "all_from_generalists" : idem pour les généralistes.
+C = {}
 
-# Mots-clés des catégories cochées par défaut (prototype, à affiner).
-# « a+b » = les deux mots doivent être présents. Comparaison sans accents ni majuscules.
-CATEGORIES = {
-    "International": ["international", "ukraine", "russie", "chine", "etats-unis", "israel", "gaza", "onu", "otan", "diplomatie"],
-    "Europe": ["europe", "europeen", "europeenne", "union europeenne", "bruxelles", "commission europeenne"],
-    "Politique France": ["gouvernement", "assemblee nationale", "senat", "depute", "ministre", "elysee", "election", "municipales", "presidentielle"],
-    "Économie": ["economie", "inflation", "croissance", "chomage", "pib", "budget", "dette publique", "entreprises"],
-    "Société": ["societe", "logement", "pauvrete", "immigration", "greve", "manifestation", "laicite"],
-    "Environnement et climat": ["climat", "climatique", "rechauffement", "environnement", "biodiversite", "pollution", "secheresse", "canicule"],
-    "Santé": ["sante", "hopital", "medecin", "maladie", "vaccin", "epidemie", "cancer", "medicament"],
-    "Éducation": ["ecole", "education", "eleves", "enseignants", "lycee", "universite", "college"],
-    "Fact-checking": ["fact-checking", "vrai ou faux", "intox", "infox", "desinformation", "fake news"],
-    "Toute l'actu locale": ["nantes", "nantais", "nantaise", "loire-atlantique", "saint-nazaire", "reze", "saint-herblain"],
-    "Nantes": ["nantes", "nantais", "nantaise"],
-    "Culture à Nantes": ["nantes+concert", "nantes+exposition", "nantes+festival", "nantes+spectacle", "nantes+musee", "nantes+theatre", "voyage a nantes", "stereolux"],
-    "Toute l'actu tech": ["tech", "smartphone", "apple", "google", "microsoft", "intelligence artificielle", "cybersecurite", "logiciel", "ordinateur"],
-    "Intelligence artificielle": ["intelligence artificielle", "ia", "chatgpt", "openai", "anthropic", "mistral ai", "gemini", "llm"],
-    "Veille informatique": ["developpeur", "logiciel", "framework", "javascript", "python", "linux", "windows", "navigateur", "cloud", "faille", "open source", "processeur", "carte graphique"],
-    "Toute l'actu sciences": ["science", "scientifique", "chercheurs", "etude", "espace", "nasa", "esa", "astronomie", "physique", "fossile"],
-    "Astronomie": ["astronomie", "telescope", "comete", "galaxie", "exoplanete", "eclipse", "asteroide", "nebuleuse", "trou noir"],
-    "Physique": ["physique", "physicien", "quantique", "particule", "cern", "fusion nucleaire", "photon"],
-    "Archéologie": ["archeologie", "archeologue", "archeologues", "fouilles", "vestiges", "sarcophage", "pharaon"],
-    "Paléontologie": ["paleontologie", "paleontologue", "dinosaure", "dinosaures", "fossile", "fossiles", "mammouth", "neandertal"],
-    "Toute l'actu jeux vidéo": ["jeu video", "jeux video", "nintendo", "playstation", "xbox", "switch 2", "steam", "ps5", "gaming"],
-    "Jeux indépendants": ["jeu independant", "jeux independants", "indie", "studio independant"],
-    "Toute la pop culture": ["cinema", "film", "serie", "manga", "anime", "bande dessinee", "comics", "musique", "album", "netflix"],
-    "Cinéma": ["cinema", "film", "box-office", "realisateur", "realisatrice", "bande-annonce", "festival de cannes"],
-    "Séries": ["serie", "saison", "episode", "showrunner"],
-    "Anime": ["anime", "animation japonaise", "crunchyroll", "ghibli"],
-    "Manga": ["manga", "mangas", "mangaka", "shonen", "one piece"],
-    "Dragon Ball": ["dragon ball", "goku", "toriyama"],
-    "BD et comics": ["bande dessinee", "bd", "comics", "marvel", "dc comics", "angouleme"],
-    "Plateformes de streaming": ["netflix", "disney+", "prime video", "canal+", "apple tv", "crunchyroll"],
-    "Musique": ["musique", "album", "concert", "chanteur", "chanteuse", "rappeur", "tournee"],
-    "Toute l'actu création": ["illustration", "illustrateur", "illustratrice", "graphisme", "design", "affiche", "street art", "serigraphie", "artisanat"],
-    "Sérigraphie": ["serigraphie", "serigraphe"],
-    "Street art": ["street art", "graffiti", "fresque", "muraliste", "banksy"],
-    "Toute l'actu argent": ["bourse", "cac 40", "banque", "credit", "taux", "epargne", "placement", "bitcoin", "etf", "livret a"],
-    "Bourse et CAC 40": ["bourse", "cac 40", "wall street", "nasdaq", "marches financiers", "dividende"],
-    "ETF": ["etf", "tracker", "trackers", "fonds indiciel"],
-    "Épargne et placements": ["epargne", "livret a", "assurance vie", "pea", "placement", "placements"],
-    "Cryptomonnaies": ["bitcoin", "crypto", "cryptomonnaie", "cryptomonnaies", "ethereum", "blockchain"],
-    "Tout le quotidien": ["jardin", "jardinage", "potager", "bricolage", "maison", "chien", "chiens", "renovation"],
-    "Jardinage et potager": ["jardin", "jardinage", "potager", "semis", "plantes", "tondeuse"],
-    "Bricolage": ["bricolage", "diy", "renovation", "perceuse", "outillage"],
-    "Chiens": ["chien", "chiens", "chiot", "chiots", "canin", "canine"],
-    "Tout le voyage": ["voyage", "voyager", "tourisme", "vacances", "destination", "compagnie aerienne"],
-}
+
+def cat(name, fam, kw, not_=(), large=False, all_spec=False, all_gen=False):
+    C[name] = {"fam": fam, "kw": kw, "not": list(not_), "large": large,
+               "all_spec": all_spec, "all_gen": all_gen}
+
+
+cat("À la une France", "actu", [], large=True, all_gen=True)
+cat("International", "actu", ["international", "internationale", "ukraine", "russie", "chine", "etats-unis", "israel", "gaza", "onu", "otan", "diplomatie", "diplomatique"])
+cat("Europe", "actu", ["europe", "europeen", "europeenne", "europeens", "union europeenne", "bruxelles", "commission europeenne"], not_=["europe 1"])
+cat("Politique France", "actu", ["gouvernement", "assemblee nationale", "senat", "depute", "deputes", "ministre", "elysee", "presidentielle", "municipales", "legislatives"])
+cat("Économie", "actu", ["economie", "economique", "inflation", "croissance", "chomage", "pib", "budget", "dette publique", "pouvoir d'achat"])
+cat("Société", "actu", ["logement", "pauvrete", "precarite", "immigration", "greve", "manifestation", "manifestations", "laicite", "discriminations"])
+cat("Environnement et climat", "actu", ["climat", "climatique", "rechauffement", "environnement", "environnementale", "biodiversite", "pollution", "secheresse", "canicule", "cop31"])
+cat("Santé", "actu", ["sante", "hopital", "hopitaux", "medecin", "medecins", "maladie", "vaccin", "epidemie", "cancer", "medicament", "medicaments"])
+cat("Éducation", "actu", ["ecole", "ecoles", "education nationale", "eleves", "enseignants", "enseignant", "lycee", "lyceens", "lyceenne", "universite", "college", "baccalaureat", "rentree scolaire"], not_=["college de france"])
+cat("Fact-checking", "actu", ["fact-checking", "vrai ou faux", "intox", "infox", "desinformation", "fake news", "fausse information"])
+
+cat("Toute l'actu locale", "local", ["nantes", "nantais", "nantaise", "loire-atlantique", "saint-nazaire", "reze", "saint-herblain"], large=True, all_spec=True)
+cat("Nantes", "local", ["nantes", "nantais", "nantaise"])
+cat("Culture à Nantes", "local", ["nantes+concert", "nantes+exposition", "nantes+festival", "nantes+spectacle", "nantes+musee", "nantes+theatre", "voyage a nantes", "stereolux", "lieu unique",
+                                   "spe:concert", "spe:exposition", "spe:festival", "spe:spectacle", "spe:theatre", "spe:musee"])
+
+cat("Toute l'actu tech", "tech", ["smartphone", "iphone", "apple", "google", "microsoft", "intelligence artificielle", "cybersecurite", "cyberattaque", "logiciel", "numerique"], large=True, all_spec=True)
+cat("Intelligence artificielle", "tech", ["ia", "intelligence artificielle", "chatgpt", "openai", "anthropic", "mistral ai", "gemini", "llm", "agent ia", "agents ia"])
+cat("Veille informatique", "tech", ["developpeur", "developpeurs", "logiciel", "framework", "javascript", "python", "linux", "windows", "navigateur", "cloud", "faille", "open source", "processeur", "carte graphique", "mise a jour"])
+
+cat("Toute l'actu sciences", "sciences", ["scientifique", "scientifiques", "chercheurs", "astronomie", "physique quantique", "dinosaure", "nasa", "esa", "spatial", "spatiale"], large=True, all_spec=True)
+cat("Astronomie", "sciences", ["astronomie", "astronome", "astronomes", "telescope", "comete", "galaxie", "exoplanete", "eclipse", "asteroide", "nebuleuse", "trou noir", "etoile filante", "aurores boreales"])
+cat("Physique", "sciences", ["physique", "physicien", "physiciens", "quantique", "particule", "particules", "cern", "fusion nucleaire", "photon"],
+    not_=["activite physique", "condition physique", "exercice physique", "physique et mental", "sante physique", "violences physiques", "aspect physique"])
+cat("Archéologie", "sciences", ["archeologie", "archeologue", "archeologues", "archeologique", "fouilles", "vestiges", "sarcophage", "pharaon", "necropole"])
+cat("Paléontologie", "sciences", ["paleontologie", "paleontologue", "paleontologues", "dinosaure", "dinosaures", "fossile de", "fossiles de", "mammouth", "neandertal", "prehistorique"],
+    not_=["energies fossiles", "energie fossile", "combustibles fossiles", "carburants fossiles"])
+
+cat("Toute l'actu jeux vidéo", "jeux", ["jeu video", "jeux video", "nintendo", "playstation", "xbox", "switch 2", "steam", "ps5", "gta 6"], large=True, all_spec=True)
+cat("Jeux indépendants", "jeux", ["jeu independant", "jeux independants", "indie", "studio independant", "spe:independant"])
+
+cat("Toute la pop culture", "pop", ["cinema", "film", "manga", "bande dessinee", "comics", "musique", "album", "netflix", "serie tv"], large=True, all_spec=True)
+cat("Cinéma", "pop", ["cinema", "film", "films", "box-office", "realisateur", "realisatrice", "bande-annonce", "festival de cannes", "oscars"])
+cat("Séries", "pop", ["serie tv", "series tv", "re:saison \\d+", "showrunner", "spe:serie", "spe:series", "spe:episode"])
+cat("Anime", "pop", ["animation japonaise", "crunchyroll", "ghibli", "miyazaki", "spe:anime", "spe:animes"])
+cat("Manga", "pop", ["manga", "mangas", "mangaka", "shonen", "seinen", "one piece"])
+cat("Dragon Ball", "pop", ["dragon ball", "goku", "toriyama"], not_=["dragon quest"])
+cat("BD et comics", "pop", ["bande dessinee", "bandes dessinees", "bd", "comics", "marvel", "dc comics", "angouleme"])
+cat("Plateformes de streaming", "pop", ["netflix", "disney+", "prime video", "canal+", "apple tv", "crunchyroll"])
+cat("Musique", "pop", ["musique", "musical", "album", "concert", "chanteur", "chanteuse", "rappeur", "rappeuse", "tournee"])
+
+cat("Toute l'actu création", "creation", ["illustration", "illustrateur", "illustratrice", "graphisme", "graphiste", "design", "street art", "serigraphie", "artisanat", "artisan"], large=True)
+cat("Sérigraphie", "creation", ["serigraphie", "serigraphe", "serigraphies"])
+cat("Street art", "creation", ["street art", "street-art", "graffiti", "graff", "muraliste", "banksy", "fresque murale"])
+
+cat("Toute l'actu argent", "argent", ["bourse", "cac 40", "banque", "banques", "epargne", "livret a", "bitcoin", "etf", "taux d'interet", "credit immobilier"], large=True, all_spec=True)
+cat("Bourse et CAC 40", "argent", ["bourse", "cac 40", "wall street", "nasdaq", "marches financiers", "dividende", "dividendes"], not_=["bourse d'etudes", "bourses d'etudes"])
+cat("ETF", "argent", ["etf", "fonds indiciel", "fonds indiciels", "trackers"])
+cat("Épargne et placements", "argent", ["epargne", "epargnants", "livret a", "assurance vie", "assurance-vie", "pea", "placer son argent", "placements financiers"])
+cat("Cryptomonnaies", "argent", ["bitcoin", "crypto", "cryptos", "cryptomonnaie", "cryptomonnaies", "ethereum", "blockchain"])
+
+cat("Tout le quotidien", "quotidien", ["jardin", "jardinage", "potager", "bricolage", "renovation", "chien", "chiens", "maison"], not_=["maison blanche"], large=True)
+cat("Jardinage et potager", "quotidien", ["jardin", "jardins", "jardinage", "jardinier", "potager", "semis", "tondeuse", "pelouse"], not_=["jardin d'enfants"])
+cat("Bricolage", "quotidien", ["bricolage", "bricoler", "diy", "renovation", "perceuse", "outillage"])
+cat("Chiens", "quotidien", ["chien", "chiens", "chiot", "chiots", "canin", "canine", "toutou"])
+
+cat("Tout le voyage", "voyage", ["voyage", "voyages", "voyager", "tourisme", "touristes", "vacances", "compagnie aerienne", "billet d'avion"], large=True)
 
 
 # ---------------------------------------------------------------- réseau
@@ -171,82 +201,133 @@ def http(url, data=None, headers=None, timeout=20):
         return 0, f"{type(e).__name__}: {e}", url
 
 
-def gnews_search(site, n=1):
-    q = urllib.parse.urlencode({"q": f"site:{site} when:2d", "hl": "fr", "gl": "FR", "ceid": "FR:fr"})
-    code, text, _ = http(f"https://news.google.com/rss/search?{q}")
-    if code != 200:
-        return [], code
+# --------------------------------------------------------- lecture des flux
+def _local(tag):
+    return tag.rsplit("}", 1)[-1] if isinstance(tag, str) else ""
+
+
+def _strip(s):
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", unescape(s or ""))).strip()
+
+
+def parse_feed(text):
+    """Lit un flux RSS 2.0, RSS 1.0 (RDF) ou Atom. Repli tolérant si le XML est invalide."""
     items = []
     try:
-        root = ET.fromstring(text.encode())
+        root = ET.fromstring(text.encode("utf-8", "replace"))
+        for el in root.iter():
+            if _local(el.tag) not in ("item", "entry"):
+                continue
+            title, link, date = "", "", ""
+            for ch in el:
+                n = _local(ch.tag)
+                if n == "title":
+                    title = _strip("".join(ch.itertext()))
+                elif n == "link":
+                    link = (ch.get("href") or ch.text or "").strip() or link
+                elif n in ("pubDate", "date", "updated", "published") and not date:
+                    date = (ch.text or "").strip()
+            items.append({"title": title, "link": link, "date": date})
+        return items
     except ET.ParseError:
-        return [], code
-    for it in root.iter("item"):
-        items.append({"title": (it.findtext("title") or "").strip(),
-                      "link": (it.findtext("link") or "").strip()})
-        if len(items) >= n:
-            break
-    return items, code
+        pass
+    for block in re.findall(r"<item\b.*?</item>", text, re.S | re.I):
+        t = re.search(r"<title[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</title>", block, re.S | re.I)
+        l = re.search(r"<link[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</link>", block, re.S | re.I)
+        items.append({"title": _strip(t.group(1)) if t else "", "link": (l.group(1).strip() if l else ""), "date": ""})
+    return items
 
 
-# ------------------------------------------- décodage Google Actualités
-def gnews_id(url):
-    m = re.search(r"/articles/([^?/#]+)", url)
-    return m.group(1) if m else None
+def looks_like_feed(text):
+    return re.search(r"<(rss|feed|rdf:RDF)\b", text[:3000], re.I) is not None
 
 
-def decode_base64_legacy(aid):
-    """Anciens liens : l'adresse réelle est encodée directement dans l'identifiant."""
-    try:
-        raw = base64.urlsafe_b64decode(aid + "=" * (-len(aid) % 4))
-    except Exception:
-        return None
-    m = re.search(rb"https?://[\x21-\x7e]+", raw)
-    if m and b"news.google" not in m.group(0):
-        return m.group(0).decode("ascii", "replace")
-    return None
+def discover_feeds(home, known):
+    """Renvoie (liste d'adresses de flux qui répondent, comment, code HTTP de l'accueil)."""
+    good = []
+    for url in known:
+        c, text, _ = http(url)
+        if c == 200 and looks_like_feed(text):
+            good.append(url)
+        time.sleep(PAUSE / 2)
+    if good:
+        return good, "adresse connue", None
+    code, html, final = http(home)
+    if code == 200:
+        for tag in re.findall(r"<link\b[^>]*>", html, re.I):
+            if re.search(r'rel=["\']?alternate', tag, re.I) and \
+               re.search(r'type=["\']application/(rss|atom)\+xml', tag, re.I):
+                href = re.search(r'href=["\']([^"\']+)', tag, re.I)
+                if href:
+                    return [urllib.parse.urljoin(final, unescape(href.group(1)))], "déclaré dans la page", code
+    for path in ("rss", "feed", "rss.xml", "feed.xml", "index.rss", "rss/une.xml"):
+        url = urllib.parse.urljoin(home if home.endswith("/") else home + "/", path)
+        c, text, _ = http(url)
+        if c == 200 and looks_like_feed(text):
+            return [url], f"adresse courante /{path}", code
+    tried = "adresses connues en échec, " if known else ""
+    return [], f"{tried}introuvable (accueil HTTP {code})", code
 
 
-def decode_batchexecute(aid):
-    """Liens récents : on demande à Google l'adresse réelle (méthode non officielle)."""
-    code, html, _ = http(f"https://news.google.com/articles/{aid}")
-    if code != 200:
-        code, html, _ = http(f"https://news.google.com/rss/articles/{aid}")
-    sg = re.search(r'data-n-a-sg="([^"]+)"', html)
-    ts = re.search(r'data-n-a-ts="([^"]+)"', html)
-    if not (sg and ts):
-        return None, f"signature introuvable (HTTP {code})"
-    inner = ('["garturlreq",[["X","X",["X","X"],null,null,1,1,"US:en",null,1,null,null,'
-             'null,null,null,0,1],"X","X",1,[1,1,1],1,1,null,0,0,null,0],'
-             f'"{aid}",{ts.group(1)},"{sg.group(1)}"]')
-    body = "f.req=" + urllib.parse.quote(json.dumps([[["Fbv4je", inner]]]))
-    code, text, _ = http("https://news.google.com/_/DotsSplashUi/data/batchexecute",
-                         data=body.encode(),
-                         headers={"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"})
-    if code != 200:
-        return None, f"batchexecute HTTP {code}"
-    try:
-        parsed = json.loads(text.split("\n\n")[1])[:-2]
-        return json.loads(parsed[0][2])[1], None
-    except Exception:
-        m = re.search(r'https?://(?!(?:[a-z]+\.)?google)[^"\\\s]+', text)
-        if m:
-            return m.group(0), None
-        return None, "réponse illisible"
+def read_feeds(urls, n=60):
+    out, seen = [], set()
+    for url in urls:
+        c, text, _ = http(url)
+        if c != 200:
+            continue
+        for it in parse_feed(text):
+            if it["link"] not in seen:
+                seen.add(it["link"])
+                out.append(it)
+        time.sleep(PAUSE / 2)
+    return out[:n * max(1, len(urls))]
 
 
-def resolve(link):
-    """Renvoie (adresse réelle ou None, méthode ou motif d'échec)."""
-    if "news.google.com" not in link:
-        return link, "lien direct"
-    aid = gnews_id(link)
-    if not aid:
-        return None, "identifiant introuvable"
-    url = decode_base64_legacy(aid)
-    if url:
-        return url, "base64"
-    url, err = decode_batchexecute(aid)
-    return (url, "batchexecute") if url else (None, err)
+# ----------------------------------------------- rangement par mots-clés
+def norm(s):
+    s = unicodedata.normalize("NFD", (s or "").lower().replace("’", "'"))
+    return "".join(c for c in s if unicodedata.category(c) != "Mn")
+
+
+def _has(text, word):
+    return re.search(r"(?<![\w])" + re.escape(word) + r"(?![\w])", text) is not None
+
+
+def _rule_ok(text, rule, specialist):
+    if rule.startswith("spe:"):
+        if not specialist:
+            return False
+        rule = rule[4:]
+    if rule.startswith("re:"):
+        return re.search(rule[3:], text) is not None
+    return all(_has(text, norm(p)) for p in rule.split("+"))
+
+
+def classify(title, families):
+    """Renvoie la liste des catégories pour un titre venant d'un média de ces familles."""
+    text = norm(title)
+    generalist = "*" in families
+    primary = None if generalist else families[0]
+    if families[0] == "local":
+        primary = "local"
+    hits = []
+    for name, c in C.items():
+        fam = c["fam"]
+        allowed = generalist or fam in families
+        if not allowed:
+            continue
+        if any(_has(text, norm(x)) for x in c["not"]):
+            continue
+        if c["all_gen"] and generalist and primary is None:
+            hits.append(name)
+            continue
+        if c["all_spec"] and primary == fam:
+            hits.append(name)
+            continue
+        specialist = (primary == fam)
+        if any(_rule_ok(text, r, specialist) for r in c["kw"]):
+            hits.append(name)
+    return hits
 
 
 # -------------------------------------------- détection « payant »
@@ -291,192 +372,131 @@ def detect_paywall(html):
     return "Non déclaré", "aucune mention"
 
 
-# ----------------------------------------- découverte et lecture des flux
-def discover_feed(home):
-    code, html, final = http(home)
-    if code == 200:
-        for tag in re.findall(r"<link\b[^>]*>", html, re.I):
-            if re.search(r'rel=["\']?alternate', tag, re.I) and \
-               re.search(r'type=["\']application/(rss|atom)\+xml', tag, re.I):
-                href = re.search(r'href=["\']([^"\']+)', tag, re.I)
-                if href:
-                    return urllib.parse.urljoin(final, unescape(href.group(1))), "déclaré dans la page"
-    for path in ("rss", "feed", "rss.xml", "feed.xml", "index.rss", "rss/une.xml"):
-        url = urllib.parse.urljoin(home if home.endswith("/") else home + "/", path)
-        c, text, _ = http(url)
-        if c == 200 and re.search(r"<(rss|feed)\b", text[:2000], re.I):
-            return url, f"adresse courante /{path}"
-    return None, f"introuvable (accueil HTTP {code})"
-
-
-def _strip_tags(s):
-    return re.sub(r"<[^>]+>", " ", unescape(s or ""))
-
-
-def read_feed(feed_url, n=60):
-    code, text, _ = http(feed_url)
+# ----------------------------------------------------- Google Actualités
+def gnews_search(query, n=3):
+    q = urllib.parse.urlencode({"q": f"{query} when:7d", "hl": "fr", "gl": "FR", "ceid": "FR:fr"})
+    code, text, _ = http(f"https://news.google.com/rss/search?{q}")
     if code != 200:
-        return []
+        return [], code
+    out = []
     try:
         root = ET.fromstring(text.encode())
     except ET.ParseError:
-        return []
-    out = []
+        return [], code
     for it in root.iter("item"):
+        src = it.find("source")
         out.append({"title": (it.findtext("title") or "").strip(),
-                    "link": (it.findtext("link") or "").strip(),
-                    "extra": " ".join([_strip_tags(it.findtext("description"))[:300]]
-                                      + [c.text or "" for c in it.findall("category")])})
-    atom = "{http://www.w3.org/2005/Atom}"
-    for en in root.iter(atom + "entry"):
-        lk = en.find(atom + "link")
-        out.append({"title": (en.findtext(atom + "title") or "").strip(),
-                    "link": lk.get("href", "") if lk is not None else "",
-                    "extra": _strip_tags(en.findtext(atom + "summary"))[:300]})
-    return out[:n]
+                    "source": (src.text or "").strip() if src is not None else ""})
+    return out, code
 
 
-# ----------------------------------------------- classement par mots-clés
-def norm(s):
-    s = unicodedata.normalize("NFD", (s or "").lower())
-    return "".join(c for c in s if unicodedata.category(c) != "Mn")
-
-
-def _has(text, word):
-    return re.search(r"(?<![\w])" + re.escape(word) + r"(?![\w])", text) is not None
-
-
-def classify(title, extra=""):
-    text = norm(title + " " + extra)
-    hits = []
-    for cat, rules in CATEGORIES.items():
-        for rule in rules:
-            if all(_has(text, norm(part)) for part in rule.split("+")):
-                hits.append(cat)
-                break
-    return hits
+def google_query(c):
+    words = [k for k in c["kw"] if not k.startswith(("spe:", "re:")) and "+" not in k][:4]
+    return " OR ".join(f'"{w}"' if " " in w else w for w in words)
 
 
 # ------------------------------------------------------------ essai
-def check_article(media, origin, title, link):
-    row = {"media": media, "origin": origin, "title": title[:70]}
-    url, how = resolve(link)
-    if origin == "Google":
-        time.sleep(PAUSE)
-    row["resolved"] = url
-    row["resolve_how"] = how
-    if not url:
-        row.update(reached="—", verdict="—", hint=how)
-        return row
-    code, html, final = http(url)
-    time.sleep(PAUSE)
-    row["final"] = final
-    if code != 200:
-        row.update(reached=f"Non (HTTP {code})" if code else "Non (erreur réseau)", verdict="—",
-                   hint=html[:60] if code == 0 else "")
-        return row
-    verdict, hint = detect_paywall(html)
-    row.update(reached="Oui", verdict=verdict, hint=hint)
-    return row
-
-
 def main():
     t0 = time.time()
-    rows, feeds, bfm, pool = [], [], [], []
+    feeds, pool, paywall = [], [], {}
+    empty_titles = 0
 
     print("== A. Flux RSS des médias ==")
-    for name, home, statut in MEDIAS:
-        feed, how = discover_feed(home)
-        items = read_feed(feed) if feed else []
-        feeds.append({"media": name, "statut": statut, "feed": feed, "how": how, "count": len(items)})
-        print(f"  [{statut}] {name}: {feed} ({how}) — {len(items)} articles")
-        for it in items:
-            pool.append(dict(it, media=name))
-        if statut == "F" and items:
-            rows.append(check_article(name, "Flux direct", items[0]["title"], items[0]["link"]))
+    for name, home, statut, fams, known in MEDIAS:
+        urls, how, _ = discover_feeds(home, known)
+        items = read_feeds(urls) if urls else []
+        kept = [it for it in items if it["title"] and not re.fullmatch(r"[\W_]*", it["title"])]
+        empty_titles += len(items) - len(kept)
+        feeds.append({"media": name, "statut": statut, "feeds": urls, "how": how, "count": len(kept)})
+        print(f"  [{statut}] {name}: {len(urls)} flux ({how}) — {len(kept)} articles")
+        for it in kept:
+            pool.append(dict(it, media=name, fams=fams))
+        # D. échantillon « payant »
+        res = []
+        for it in kept[:PAYWALL_PER_MEDIA]:
+            code, html, _ = http(it["link"]) if it["link"] else (0, "", "")
+            res.append(detect_paywall(html)[0] if code == 200 else f"Bloqué ({code})")
+            time.sleep(PAUSE)
+        paywall[name] = res
         time.sleep(PAUSE)
 
-    print("== B. Classement des articles des flux ==")
-    coverage = {c: 0 for c in CATEGORIES}
-    examples = {c: "" for c in CATEGORIES}
-    unclassified = 0
+    print("== B. Rangement ==")
+    coverage = {c: 0 for c in C}
+    examples = {c: [] for c in C}
+    unclassified = []
     for it in pool:
-        cats = classify(it["title"], it.get("extra", ""))
+        cats = classify(it["title"], it["fams"])
         if not cats:
-            unclassified += 1
+            unclassified.append(it)
         for c in cats:
             coverage[c] += 1
-            if not examples[c]:
-                examples[c] = f"{it['title'][:60]} ({it['media']})"
+            if len(examples[c]) < 3:
+                examples[c].append(f"{it['title'][:70]} ({it['media']})")
 
-    print("== C-E. Articles via Google Actualités ==")
-    for name, site in GOOGLE_SITES:
-        items, code = gnews_search(site)
-        if not items:
-            rows.append({"media": name, "origin": "Google", "title": "(aucun résultat)", "resolved": None,
-                         "resolve_how": f"recherche HTTP {code}", "reached": "—", "verdict": "—", "hint": ""})
-        for it in items:
-            rows.append(check_article(name, "Google", it["title"], it["link"]))
+    print("== C. Complément Google pour les catégories faibles ==")
+    google = []
+    for c, n in sorted(coverage.items(), key=lambda kv: kv[1]):
+        if n >= 10:
+            continue
+        q = google_query(C[c])
+        if not q:
+            google.append({"cat": c, "query": "—", "count": 0, "examples": []})
+            continue
+        res, code = gnews_search(q)
+        google.append({"cat": c, "query": q, "count": len(res), "code": code,
+                       "examples": [f"{r['title'][:70]}" for r in res[:2]]})
         time.sleep(PAUSE)
 
-    print("== F. BFMTV / BFM Business ==")
-    for label, query_site in (("BFM Business", "bfmtv.com/economie"), ("BFMTV", "bfmtv.com")):
-        items, code = gnews_search(query_site, n=3)
-        for it in items:
-            url, how = resolve(it["link"])
-            bfm.append({"label": label, "title": it["title"][:60], "url": url or f"non résolu ({how})"})
-            time.sleep(PAUSE)
-        if not items:
-            bfm.append({"label": label, "title": "(aucun résultat)", "url": f"HTTP {code}"})
-
-    report(rows, feeds, bfm, coverage, examples, len(pool), unclassified, round((time.time() - t0) / 60, 1))
+    report(feeds, coverage, examples, unclassified, google, paywall, len(pool), empty_titles,
+           round((time.time() - t0) / 60, 1))
 
 
-def report(rows, feeds, bfm, coverage, examples, pool_size, unclassified, minutes):
-    g = [r for r in rows if r["origin"] == "Google" and r["title"] != "(aucun résultat)"]
-    reached = [r for r in rows if r.get("reached") == "Oui"]
-    declared = [r for r in reached if r["verdict"] != "Non déclaré"]
-    tried = [r for r in rows if r.get("resolved")]
-    blocked = [r for r in tried if str(r.get("reached", "")).startswith("Non")]
+def report(feeds, coverage, examples, unclassified, google, paywall, pool_size, empty_titles, minutes):
     pct = lambda a, b: f"{a}/{b} ({round(100 * a / b)} %)" if b else "0/0"
-    ok_feeds = [f for f in feeds if f["count"]]
+    esc = lambda s: str(s).replace("|", "/")
 
     def verdict(n):
-        if n >= 10:
-            return "Flux suffisants"
-        if n >= 3:
-            return "Flux + complément Google"
-        return "Google nécessaire"
+        return "Flux suffisants" if n >= 10 else ("Flux + complément Google" if n >= 3 else "Google nécessaire")
 
-    L = ["# Flow Actu — résultats de l'essai technique", "", f"Durée : {minutes} min", ""]
-    L += ["## Résumé", "",
-          "| Question | Résultat |", "|---|---|",
-          f"| A. Médias avec un flux RSS trouvé et lisible | {pct(len(ok_feeds), len(feeds))} |",
-          f"| B. Articles lus dans les flux / non classés | {pool_size} / {unclassified} |",
-          f"| B. Catégories couvertes par les flux seuls (≥ 10 articles) | "
-          f"{pct(sum(1 for n in coverage.values() if n >= 10), len(coverage))} |",
-          f"| C. Liens Google Actualités décodés | {pct(sum(1 for r in g if r['resolved']), len(g))} |",
-          f"| D. Statut payant / gratuit détectable (pages atteintes) | {pct(len(declared), len(reached))} |",
-          f"| E. Pages bloquées ou en erreur | {pct(len(blocked), len(tried))} |",
-          ""]
-    L += ["## B. Couverture des catégories par les flux RSS", "",
-          "| Catégorie | Articles trouvés | Verdict | Exemple |", "|---|---|---|---|"]
+    ok_feeds = [f for f in feeds if f["count"]]
+    pw_all = [v for vs in paywall.values() for v in vs]
+    pw_reached = [v for v in pw_all if not v.startswith("Bloqué")]
+    pw_declared = [v for v in pw_reached if v != "Non déclaré"]
+
+    L = ["# Flow Actu — résultats de l'essai technique n° 2", "", f"Durée : {minutes} min", ""]
+    L += ["## Résumé", "", "| Question | Résultat |", "|---|---|",
+          f"| A. Médias avec au moins un flux lisible | {pct(len(ok_feeds), len(feeds))} |",
+          f"| A. Dont trouvés grâce aux adresses connues | {sum(1 for f in ok_feeds if f['how'] == 'adresse connue')} |",
+          f"| B. Articles lus / sans catégorie / sans titre (ignorés) | {pool_size} / {len(unclassified)} / {empty_titles} |",
+          f"| B. Catégories avec 10 articles ou plus | {pct(sum(1 for n in coverage.values() if n >= 10), len(coverage))} |",
+          f"| C. Catégories faibles où Google ramène des articles | {pct(sum(1 for g in google if g['count']), len(google))} |",
+          f"| D. Pages d'articles atteintes | {pct(len(pw_reached), len(pw_all))} |",
+          f"| D. Statut payant / gratuit déclaré (pages atteintes) | {pct(len(pw_declared), len(pw_reached))} |", ""]
+
+    L += ["## B. Rangement par catégorie (3 exemples pour juger)", "",
+          "| Catégorie | Articles | Verdict | Exemples |", "|---|---|---|---|"]
     for c, n in sorted(coverage.items(), key=lambda kv: kv[1]):
-        L.append(f"| {c} | {n} | {verdict(n)} | {examples[c].replace('|', '/')} |")
-    L += ["", "## C-E. Articles testés (payant / gratuit)", "",
-          "| Média | Origine | Décodage | Page atteinte | Statut détecté | Indice | Titre |",
-          "|---|---|---|---|---|---|---|"]
-    for r in rows:
-        dec = r.get("resolve_how", "") if r["origin"] == "Google" else "—"
-        L.append(f"| {r['media']} | {r['origin']} | {dec} | {r.get('reached', '—')} | {r.get('verdict', '—')} "
-                 f"| {str(r.get('hint', '')).replace('|', '/')} | {r['title'].replace('|', '/')} |")
-    L += ["", "## F. BFMTV / BFM Business", "", "| Recherche | Adresse réelle | Titre |", "|---|---|---|"]
-    for b in bfm:
-        L.append(f"| {b['label']} | {b['url']} | {b['title'].replace('|', '/')} |")
+        L.append(f"| {c} | {n} | {verdict(n)} | {esc(' ◆ '.join(examples[c]))} |")
+
+    L += ["", "## B. Échantillon d'articles sans catégorie", ""]
+    for it in unclassified[:15]:
+        L.append(f"- {esc(it['title'][:90])} ({it['media']})")
+
+    L += ["", "## C. Complément Google pour les catégories faibles", "",
+          "| Catégorie | Recherche | Résultats (7 jours) | Exemples |", "|---|---|---|---|"]
+    for g in google:
+        L.append(f"| {g['cat']} | {esc(g['query'])} | {g['count']} | {esc(' ◆ '.join(g['examples']))} |")
+
+    L += ["", "## D. Payant / gratuit, média par média", "",
+          "| Média | Résultats (2 articles max) |", "|---|---|"]
+    for m, vs in paywall.items():
+        if vs:
+            L.append(f"| {m} | {esc(', '.join(vs))} |")
+
     L += ["", "## A. Flux RSS des médias", "", "| Média | Statut | Flux | Comment | Articles |", "|---|---|---|---|---|"]
     for f in feeds:
-        L.append(f"| {f['media']} | {'Favori' if f['statut'] == 'F' else 'Neutre'} | {f['feed'] or '—'} "
-                 f"| {f['how']} | {f['count']} |")
+        L.append(f"| {f['media']} | {'Favori' if f['statut'] == 'F' else 'Neutre'} | "
+                 f"{esc('<br>'.join(f['feeds']) or '—')} | {f['how']} | {f['count']} |")
     text = "\n".join(L) + "\n"
 
     print(text)
@@ -485,8 +505,8 @@ def report(rows, feeds, bfm, coverage, examples, pool_size, unclassified, minute
         with open(summary, "a", encoding="utf-8") as fh:
             fh.write(text)
     with open("resultats-essai.json", "w", encoding="utf-8") as fh:
-        json.dump({"articles": rows, "flux": feeds, "bfm": bfm, "couverture": coverage},
-                  fh, ensure_ascii=False, indent=1)
+        json.dump({"flux": feeds, "couverture": coverage, "exemples": examples,
+                   "google": google, "payant": paywall}, fh, ensure_ascii=False, indent=1)
 
 
 if __name__ == "__main__":
