@@ -1,0 +1,17 @@
+{
+ "titre": "Flow Actu",
+ "prenom": "Flow",
+ "depot": "flowPowa/flow-actu",
+ "branche": "main",
+ "meteo": {"ville": "Nantes", "lat": 47.2184, "lon": -1.5536},
+ "max_par_categorie": 30,
+ "google": {
+  "fraicheur": "when:7d",
+  "resultats_par_recherche": 12,
+  "rotation_non_cochees": 4,
+  "max_decodages_par_passage": 60
+ },
+ "payant": {"max_verifications_par_passage": 150},
+ "sites_institutionnels": ["ville", "mairie", "commune", "region", "departement", "prefecture", "office de tourisme", "metropole", "agglomeration", "communaute de communes", "gouv"],
+ "titres_de_service": ["en direct, cours", "cours de bourse", "cours actions", "conseils aux voyageurs", "nous contacter", "mentions legales", "page d'accueil"]
+}

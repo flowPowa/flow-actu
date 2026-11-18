@@ -1,0 +1,14 @@
+{
+ "_aide": "Groupes de mots masqués. Comparaison sur le titre, sans accents ni majuscules. Chaque mot couvre ses variantes courantes (s, e, es, ée, ées, er, x) : « viol » couvre violé, violée, violer, viols… Pour une expression de plusieurs mots, les variantes s'appliquent au dernier mot.",
+ "groupes": [
+  {"id": "glauque", "nom": "Glauque", "description": "Faits divers violents et sordides", "actif": true, "mots": [
+   "meurtre", "meurtrier", "meurtriere", "assassinat", "assassin", "homicide", "viol", "violeur", "feminicide", "infanticide", "parricide",
+   "pedocriminalite", "pedocriminel", "pedophile", "pedophilie", "cadavre", "corps sans vie", "retrouve mort", "retrouvee morte",
+   "poignard", "egorge", "decapite", "tue par balle", "tuee par balle", "torture", "inceste", "sequestration", "sequestre",
+   "agression sexuelle", "agressions sexuelles", "abus sexuel", "abus sexuels", "violence sexuelle", "violences sexuelles", "attouchements", "crime sexuel", "demembre"]},
+  {"id": "spoilers", "nom": "Spoilers", "description": "Titres qui révèlent une intrigue", "actif": true, "mots": [
+   "spoiler", "spoil", "divulgacheur", "divulgachage", "fin expliquee", "fin explique", "boss final", "revelation", "twist", "dernier episode", "mort de", "meurt dans"]},
+  {"id": "pieges-a-clics", "nom": "Pièges à clics", "description": "Titres racoleurs", "actif": true, "mots": [
+   "vous ne devinerez jamais", "va vous choquer", "vont vous choquer", "cette astuce", "incroyable mais vrai", "les internautes sont choques", "ce que vous ne saviez pas", "la raison va vous surprendre"]}
+ ]
+}

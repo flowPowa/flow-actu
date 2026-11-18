@@ -1,0 +1,2246 @@
+{
+ "familles": [
+  {
+   "id": "actu",
+   "nom": "Actualité générale"
+  },
+  {
+   "id": "local",
+   "nom": "Local"
+  },
+  {
+   "id": "tech",
+   "nom": "Tech et développement"
+  },
+  {
+   "id": "sciences",
+   "nom": "Sciences"
+  },
+  {
+   "id": "jeux",
+   "nom": "Jeux vidéo"
+  },
+  {
+   "id": "pop",
+   "nom": "Pop culture et écrans"
+  },
+  {
+   "id": "creation",
+   "nom": "Création et boutique"
+  },
+  {
+   "id": "argent",
+   "nom": "Argent et consommation"
+  },
+  {
+   "id": "quotidien",
+   "nom": "Maison, nature et quotidien"
+  },
+  {
+   "id": "voyage",
+   "nom": "Voyage et découverte"
+  }
+ ],
+ "categories": [
+  {
+   "id": "a-la-une",
+   "nom": "À la une France",
+   "famille": "actu",
+   "large": true,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": false,
+   "tout_generalistes": true,
+   "mots": [],
+   "exclure": []
+  },
+  {
+   "id": "international",
+   "nom": "International",
+   "famille": "actu",
+   "large": false,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "international",
+    "internationale",
+    "ukraine",
+    "russie",
+    "chine",
+    "etats-unis",
+    "israel",
+    "gaza",
+    "onu",
+    "otan",
+    "diplomatie",
+    "diplomatique"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "europe",
+   "nom": "Europe",
+   "famille": "actu",
+   "large": false,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "europe",
+    "europeen",
+    "europeenne",
+    "europeens",
+    "union europeenne",
+    "bruxelles",
+    "commission europeenne"
+   ],
+   "exclure": [
+    "europe 1",
+    "nba",
+    "ligue des champions",
+    "coupe d'europe"
+   ]
+  },
+  {
+   "id": "politique",
+   "nom": "Politique France",
+   "famille": "actu",
+   "large": false,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "gouvernement",
+    "assemblee nationale",
+    "senat",
+    "depute",
+    "deputes",
+    "ministre",
+    "elysee",
+    "presidentielle",
+    "municipales",
+    "legislatives"
+   ],
+   "exclure": [
+    "yemen",
+    "yemenite",
+    "houthistes",
+    "kiev",
+    "moscou",
+    "washington",
+    "pekin",
+    "berlin",
+    "madrid",
+    "londres",
+    "tel aviv",
+    "jerusalem",
+    "teheran",
+    "beyrouth",
+    "damas",
+    "ankara",
+    "kremlin",
+    "maison blanche"
+   ]
+  },
+  {
+   "id": "economie",
+   "nom": "Économie",
+   "famille": "actu",
+   "large": false,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "economie",
+    "economique",
+    "inflation",
+    "croissance",
+    "chomage",
+    "pib",
+    "budget",
+    "dette publique",
+    "pouvoir d'achat"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "societe",
+   "nom": "Société",
+   "famille": "actu",
+   "large": false,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "logement",
+    "pauvrete",
+    "precarite",
+    "immigration",
+    "greve",
+    "manifestation",
+    "manifestations",
+    "laicite",
+    "discriminations"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "environnement",
+   "nom": "Environnement et climat",
+   "famille": "actu",
+   "large": false,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "climat",
+    "climatique",
+    "rechauffement",
+    "environnement",
+    "environnementale",
+    "biodiversite",
+    "pollution",
+    "secheresse",
+    "canicule",
+    "cop31"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "sante",
+   "nom": "Santé",
+   "famille": "actu",
+   "large": false,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "sante",
+    "hopital",
+    "hopitaux",
+    "medecin",
+    "medecins",
+    "maladie",
+    "vaccin",
+    "epidemie",
+    "cancer",
+    "medicament",
+    "medicaments"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "education",
+   "nom": "Éducation",
+   "famille": "actu",
+   "large": false,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "ecole",
+    "ecoles",
+    "education nationale",
+    "eleves",
+    "enseignants",
+    "enseignant",
+    "lycee",
+    "lyceens",
+    "lyceenne",
+    "universite",
+    "college",
+    "baccalaureat",
+    "rentree scolaire"
+   ],
+   "exclure": [
+    "college de france"
+   ]
+  },
+  {
+   "id": "fact-checking",
+   "nom": "Fact-checking",
+   "famille": "actu",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "fact-checking",
+    "vrai ou faux",
+    "intox",
+    "infox",
+    "desinformation",
+    "fake news",
+    "fausse information"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "local",
+   "nom": "Toute l'actu locale",
+   "famille": "local",
+   "large": true,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": true,
+   "tout_generalistes": false,
+   "mots": [
+    "nantes",
+    "nantais",
+    "nantaise",
+    "loire-atlantique",
+    "saint-nazaire",
+    "reze",
+    "saint-herblain"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "nantes",
+   "nom": "Nantes",
+   "famille": "local",
+   "large": false,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "nantes",
+    "nantais",
+    "nantaise"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "reze",
+   "nom": "Rezé",
+   "famille": "local",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "reze",
+    "rezeen",
+    "rezeenne"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "saint-herblain",
+   "nom": "Saint-Herblain",
+   "famille": "local",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "saint-herblain",
+    "herblinois",
+    "herblinoise"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "loire-atlantique",
+   "nom": "Loire-Atlantique",
+   "famille": "local",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "loire-atlantique",
+    "saint-nazaire",
+    "pornic",
+    "clisson",
+    "ancenis",
+    "chateaubriant",
+    "guerande",
+    "la baule"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "pays-de-la-loire",
+   "nom": "Pays de la Loire",
+   "famille": "local",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "pays de la loire",
+    "angers",
+    "le mans",
+    "laval",
+    "la roche-sur-yon",
+    "vendee",
+    "sarthe",
+    "mayenne",
+    "maine-et-loire"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "bretagne",
+   "nom": "Bretagne",
+   "famille": "local",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "bretagne",
+    "breton",
+    "bretonne",
+    "rennes",
+    "brest",
+    "quimper",
+    "vannes",
+    "lorient",
+    "saint-malo"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "transports-nantais",
+   "nom": "Transports nantais",
+   "famille": "local",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "naolib",
+    "busway",
+    "chronobus",
+    "nantes+tramway",
+    "nantes+tram",
+    "nantes+bus",
+    "periph nantais",
+    "nantes+periph"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "urbanisme-nantes",
+   "nom": "Urbanisme Nantes",
+   "famille": "local",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "nantes+urbanisme",
+    "nantes+chantier",
+    "nantes+projet urbain",
+    "ile de nantes",
+    "nantes+logements",
+    "nantes+quartier"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "fc-nantes",
+   "nom": "FC Nantes",
+   "famille": "local",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "fc nantes",
+    "fcn",
+    "canaris",
+    "la beaujoire",
+    "beaujoire"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "culture-nantes",
+   "nom": "Culture à Nantes",
+   "famille": "local",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "nantes+concert",
+    "nantes+exposition",
+    "nantes+festival",
+    "nantes+spectacle",
+    "nantes+musee",
+    "nantes+theatre",
+    "voyage a nantes",
+    "stereolux",
+    "le lieu unique",
+    "spe:concert",
+    "spe:exposition",
+    "spe:festival",
+    "spe:spectacle",
+    "spe:theatre",
+    "spe:musee"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "tech",
+   "nom": "Toute l'actu tech",
+   "famille": "tech",
+   "large": true,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": true,
+   "tout_generalistes": false,
+   "mots": [
+    "smartphone",
+    "iphone",
+    "apple",
+    "google",
+    "microsoft",
+    "intelligence artificielle",
+    "cybersecurite",
+    "cyberattaque",
+    "logiciel",
+    "numerique"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "ia",
+   "nom": "Intelligence artificielle",
+   "famille": "tech",
+   "large": false,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "ia",
+    "intelligence artificielle",
+    "chatgpt",
+    "openai",
+    "anthropic",
+    "mistral ai",
+    "gemini",
+    "llm",
+    "agent ia",
+    "agents ia"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "veille-informatique",
+   "nom": "Veille informatique",
+   "famille": "tech",
+   "large": false,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "developpeur",
+    "developpeurs",
+    "logiciel",
+    "framework",
+    "javascript",
+    "python",
+    "linux",
+    "windows",
+    "navigateur",
+    "cloud",
+    "faille",
+    "open source",
+    "processeur",
+    "carte graphique",
+    "mise a jour"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "anthropic-claude",
+   "nom": "Anthropic et Claude",
+   "famille": "tech",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "anthropic",
+    "claude ai",
+    "claude opus",
+    "claude sonnet",
+    "claude haiku",
+    "claude fable",
+    "claude mythos",
+    "claude code"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "recherche-ia",
+   "nom": "Recherche en IA",
+   "famille": "tech",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "recherche en ia",
+    "chercheurs en ia",
+    "deepmind",
+    "modele de langage",
+    "modeles de langage",
+    "benchmark",
+    "agi"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "test-qa",
+   "nom": "Test logiciel et QA",
+   "famille": "tech",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "test logiciel",
+    "tests logiciels",
+    "assurance qualite",
+    "testeur",
+    "testeurs",
+    "tests automatises",
+    "automatisation des tests",
+    "qa"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "playwright",
+   "nom": "Playwright",
+   "famille": "tech",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "playwright"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "robot-framework",
+   "nom": "Robot Framework",
+   "famille": "tech",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "robot framework"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "dev-web",
+   "nom": "Développement web",
+   "famille": "tech",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "developpement web",
+    "javascript",
+    "typescript",
+    "react",
+    "css",
+    "html",
+    "node.js",
+    "framework web"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "open-source",
+   "nom": "Open source et GitHub",
+   "famille": "tech",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "open source",
+    "github",
+    "gitlab",
+    "logiciel libre",
+    "logiciels libres"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "cybersecurite",
+   "nom": "Cybersécurité",
+   "famille": "tech",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "cybersecurite",
+    "cyberattaque",
+    "cyberattaques",
+    "piratage",
+    "rancongiciel",
+    "ransomware",
+    "fuite de donnees",
+    "hackers",
+    "phishing",
+    "hameconnage"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "linux",
+   "nom": "Linux",
+   "famille": "tech",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "linux",
+    "ubuntu",
+    "debian",
+    "fedora",
+    "gnome",
+    "kde"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "sciences",
+   "nom": "Toute l'actu sciences",
+   "famille": "sciences",
+   "large": true,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": true,
+   "tout_generalistes": false,
+   "mots": [
+    "scientifique",
+    "scientifiques",
+    "astronomie",
+    "physique quantique",
+    "dinosaure",
+    "nasa",
+    "esa",
+    "spatial",
+    "spatiale"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "astronomie",
+   "nom": "Astronomie",
+   "famille": "sciences",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "astronomie",
+    "astronome",
+    "astronomes",
+    "telescope",
+    "comete",
+    "galaxie",
+    "exoplanete",
+    "eclipse",
+    "asteroide",
+    "nebuleuse",
+    "trou noir",
+    "etoile filante",
+    "aurores boreales"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "espace",
+   "nom": "Espace (ESA, NASA)",
+   "famille": "sciences",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "nasa",
+    "esa",
+    "cnes",
+    "spatial",
+    "spatiale",
+    "fusee",
+    "ariane 6",
+    "spacex",
+    "station spatiale",
+    "astronaute",
+    "astronautes",
+    "sonde",
+    "spe:espace"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "physique",
+   "nom": "Physique",
+   "famille": "sciences",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "physique",
+    "physicien",
+    "physiciens",
+    "quantique",
+    "particule",
+    "particules",
+    "cern",
+    "fusion nucleaire",
+    "photon"
+   ],
+   "exclure": [
+    "activite physique",
+    "condition physique",
+    "exercice physique",
+    "physique et mental",
+    "sante physique",
+    "violences physiques",
+    "aspect physique"
+   ]
+  },
+  {
+   "id": "biologie",
+   "nom": "Biologie",
+   "famille": "sciences",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "biologie",
+    "biologiste",
+    "biologistes",
+    "adn",
+    "genetique",
+    "genome",
+    "microbiote",
+    "spe:espece",
+    "spe:especes",
+    "spe:cellules"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "archeologie",
+   "nom": "Archéologie",
+   "famille": "sciences",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "archeologie",
+    "archeologue",
+    "archeologues",
+    "archeologique",
+    "fouilles",
+    "vestiges",
+    "sarcophage",
+    "pharaon",
+    "necropole"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "paleontologie",
+   "nom": "Paléontologie",
+   "famille": "sciences",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "paleontologie",
+    "paleontologue",
+    "paleontologues",
+    "dinosaure",
+    "dinosaures",
+    "fossile de",
+    "fossiles de",
+    "mammouth",
+    "neandertal",
+    "prehistorique"
+   ],
+   "exclure": [
+    "energies fossiles",
+    "energie fossile",
+    "combustibles fossiles",
+    "carburants fossiles"
+   ]
+  },
+  {
+   "id": "oceans",
+   "nom": "Océans",
+   "famille": "sciences",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "ocean",
+    "oceans",
+    "fonds marins",
+    "biologie marine",
+    "faune marine",
+    "baleine",
+    "baleines",
+    "requin",
+    "requins",
+    "corail",
+    "coraux",
+    "recif"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "science-climat",
+   "nom": "Science du climat",
+   "famille": "sciences",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "giec",
+    "climatologue",
+    "climatologues",
+    "modele climatique",
+    "rechauffement climatique",
+    "el nino"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "recherche-medicale",
+   "nom": "Recherche médicale",
+   "famille": "sciences",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "recherche medicale",
+    "essai clinique",
+    "essais cliniques",
+    "inserm",
+    "therapie genique",
+    "spe:traitement",
+    "spe:maladie"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "mathematiques",
+   "nom": "Mathématiques",
+   "famille": "sciences",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "mathematiques",
+    "mathematicien",
+    "mathematicienne",
+    "theoreme",
+    "conjecture",
+    "maths"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "jeux",
+   "nom": "Toute l'actu jeux vidéo",
+   "famille": "jeux",
+   "large": true,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": true,
+   "tout_generalistes": false,
+   "mots": [
+    "jeu video",
+    "jeux video",
+    "nintendo",
+    "playstation",
+    "xbox",
+    "switch 2",
+    "steam",
+    "ps5",
+    "gta 6"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "jrpg",
+   "nom": "JRPG",
+   "famille": "jeux",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "jrpg",
+    "rpg japonais"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "final-fantasy",
+   "nom": "Final Fantasy",
+   "famille": "jeux",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "final fantasy",
+    "ff7",
+    "ff9",
+    "ff14",
+    "ffxiv"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "dragon-quest",
+   "nom": "Dragon Quest",
+   "famille": "jeux",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "dragon quest"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "square-enix",
+   "nom": "Square Enix",
+   "famille": "jeux",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "square enix"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "nintendo",
+   "nom": "Nintendo",
+   "famille": "jeux",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "nintendo",
+    "switch 2",
+    "mario",
+    "zelda",
+    "pokemon"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "playstation",
+   "nom": "PlayStation",
+   "famille": "jeux",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "playstation",
+    "ps5",
+    "ps6",
+    "sony interactive"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "steam-pc",
+   "nom": "Steam et PC",
+   "famille": "jeux",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "steam",
+    "jeu pc",
+    "jeux pc",
+    "steam deck",
+    "epic games store",
+    "gog"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "jeux-independants",
+   "nom": "Jeux indépendants",
+   "famille": "jeux",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "jeu independant",
+    "jeux independants",
+    "jeu inde",
+    "jeux indes",
+    "studio independant",
+    "spe:independant",
+    "spe:indie"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "retrogaming",
+   "nom": "Rétrogaming",
+   "famille": "jeux",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "retrogaming",
+    "remaster",
+    "remastered",
+    "console retro",
+    "jeux retro",
+    "jeu retro"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "pop",
+   "nom": "Toute la pop culture",
+   "famille": "pop",
+   "large": true,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": true,
+   "tout_generalistes": false,
+   "mots": [
+    "cinema",
+    "film",
+    "manga",
+    "bande dessinee",
+    "comics",
+    "musique",
+    "album",
+    "netflix",
+    "serie tv"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "cinema",
+   "nom": "Cinéma",
+   "famille": "pop",
+   "large": false,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "cinema",
+    "film",
+    "films",
+    "box-office",
+    "realisateur",
+    "realisatrice",
+    "bande-annonce",
+    "festival de cannes",
+    "oscars"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "series",
+   "nom": "Séries",
+   "famille": "pop",
+   "large": false,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "serie tv",
+    "series tv",
+    "re:saison \\d+",
+    "showrunner",
+    "spe:serie",
+    "spe:series",
+    "spe:episode"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "anime",
+   "nom": "Anime",
+   "famille": "pop",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "animation japonaise",
+    "crunchyroll",
+    "ghibli",
+    "miyazaki",
+    "spe:anime",
+    "spe:animes"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "manga",
+   "nom": "Manga",
+   "famille": "pop",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "manga",
+    "mangas",
+    "mangaka",
+    "shonen",
+    "seinen",
+    "one piece"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "dragon-ball",
+   "nom": "Dragon Ball",
+   "famille": "pop",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "dragon ball",
+    "goku",
+    "toriyama"
+   ],
+   "exclure": [
+    "dragon quest"
+   ]
+  },
+  {
+   "id": "bd-comics",
+   "nom": "BD et comics",
+   "famille": "pop",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "bande dessinee",
+    "bandes dessinees",
+    "bd",
+    "comics",
+    "angouleme",
+    "dc comics"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "sf-fantasy",
+   "nom": "SF et fantasy",
+   "famille": "pop",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "science-fiction",
+    "fantasy",
+    "star wars",
+    "star trek",
+    "seigneur des anneaux"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "jeux-societe",
+   "nom": "Jeux de société",
+   "famille": "pop",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "jeu de societe",
+    "jeux de societe",
+    "boardgame",
+    "escape game"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "streaming",
+   "nom": "Plateformes de streaming",
+   "famille": "pop",
+   "large": false,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "netflix",
+    "disney+",
+    "prime video",
+    "canal+",
+    "apple tv",
+    "crunchyroll"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "musique",
+   "nom": "Musique",
+   "famille": "pop",
+   "large": false,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "musique",
+    "musical",
+    "album",
+    "concert",
+    "chanteur",
+    "chanteuse",
+    "rappeur",
+    "rappeuse",
+    "tournee"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "creation",
+   "nom": "Toute l'actu création",
+   "famille": "creation",
+   "large": true,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "illustration",
+    "illustrateur",
+    "illustratrice",
+    "graphisme",
+    "graphiste",
+    "design",
+    "street art",
+    "serigraphie",
+    "artisanat",
+    "artisan"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "serigraphie",
+   "nom": "Sérigraphie",
+   "famille": "creation",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "serigraphie",
+    "serigraphe",
+    "serigraphies"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "illustration",
+   "nom": "Illustration",
+   "famille": "creation",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "illustration",
+    "illustrateur",
+    "illustratrice",
+    "dessinateur",
+    "dessinatrice"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "affiches",
+   "nom": "Affiches et posters",
+   "famille": "creation",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "affiche de film",
+    "affiches",
+    "poster",
+    "posters",
+    "affichiste"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "graphisme",
+   "nom": "Graphisme et design",
+   "famille": "creation",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "graphisme",
+    "graphiste",
+    "design",
+    "designer",
+    "typographie",
+    "identite visuelle"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "street-art",
+   "nom": "Street art",
+   "famille": "creation",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "street art",
+    "street-art",
+    "graffiti",
+    "graff",
+    "muraliste",
+    "banksy",
+    "fresque murale"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "skateboard",
+   "nom": "Skateboard",
+   "famille": "creation",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "skateboard",
+    "skate",
+    "skatepark",
+    "skateur",
+    "skateuse"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "stickers",
+   "nom": "Stickers et papeterie",
+   "famille": "creation",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "sticker",
+    "stickers",
+    "autocollant",
+    "autocollants",
+    "papeterie"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "etsy",
+   "nom": "Etsy et artisanat en ligne",
+   "famille": "creation",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "etsy",
+    "artisanat",
+    "artisan",
+    "artisans",
+    "fait main"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "micro-entreprise",
+   "nom": "Micro-entreprise",
+   "famille": "creation",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "micro-entreprise",
+    "micro-entrepreneur",
+    "micro-entrepreneurs",
+    "auto-entrepreneur",
+    "auto-entrepreneurs",
+    "urssaf"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "decoupe-impression",
+   "nom": "Découpe et impression",
+   "famille": "creation",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "impression 3d",
+    "imprimante 3d",
+    "cricut",
+    "silhouette cameo",
+    "decoupe laser"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "argent",
+   "nom": "Toute l'actu argent",
+   "famille": "argent",
+   "large": true,
+   "defaut": true,
+   "google": false,
+   "tout_specialistes": true,
+   "tout_generalistes": false,
+   "mots": [
+    "bourse",
+    "cac 40",
+    "banque",
+    "banques",
+    "epargne",
+    "livret a",
+    "bitcoin",
+    "etf",
+    "taux d'interet",
+    "credit immobilier"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "bourse",
+   "nom": "Bourse et CAC 40",
+   "famille": "argent",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "bourse",
+    "cac 40",
+    "wall street",
+    "nasdaq",
+    "marches financiers",
+    "dividende",
+    "dividendes"
+   ],
+   "exclure": [
+    "bourse d'etudes",
+    "bourses d'etudes"
+   ]
+  },
+  {
+   "id": "etf",
+   "nom": "ETF",
+   "famille": "argent",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "etf",
+    "fonds indiciel",
+    "fonds indiciels",
+    "trackers"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "epargne",
+   "nom": "Épargne et placements",
+   "famille": "argent",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "epargne",
+    "epargnants",
+    "livret a",
+    "assurance vie",
+    "assurance-vie",
+    "pea",
+    "placer son argent",
+    "placements financiers"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "crypto",
+   "nom": "Cryptomonnaies",
+   "famille": "argent",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "bitcoin",
+    "crypto",
+    "cryptos",
+    "cryptomonnaie",
+    "cryptomonnaies",
+    "ethereum",
+    "blockchain"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "immobilier",
+   "nom": "Immobilier",
+   "famille": "argent",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "immobilier",
+    "immobiliere",
+    "loyer",
+    "loyers",
+    "credit immobilier",
+    "dpe",
+    "notaire",
+    "notaires"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "energie",
+   "nom": "Prix de l'énergie",
+   "famille": "argent",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "prix de l'electricite",
+    "prix du gaz",
+    "facture d'electricite",
+    "carburant",
+    "carburants",
+    "prix de l'essence",
+    "tarif reglemente"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "consommation",
+   "nom": "Consommation et bons plans",
+   "famille": "argent",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "consommation",
+    "consommateurs",
+    "soldes",
+    "black friday",
+    "bon plan",
+    "bons plans"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "neobanques",
+   "nom": "Néobanques",
+   "famille": "argent",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "neobanque",
+    "neobanques",
+    "revolut",
+    "n26",
+    "boursobank",
+    "banque en ligne",
+    "qonto"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "emploi",
+   "nom": "Emploi",
+   "famille": "argent",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "emploi",
+    "france travail",
+    "recrutement",
+    "embauche",
+    "licenciements",
+    "plan social"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "impots",
+   "nom": "Impôts",
+   "famille": "argent",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "impot",
+    "impots",
+    "fiscalite",
+    "fiscal",
+    "declaration de revenus",
+    "prelevement a la source"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "quotidien",
+   "nom": "Tout le quotidien",
+   "famille": "quotidien",
+   "large": true,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "jardinage",
+    "potager",
+    "jardinier",
+    "bricolage",
+    "renovation",
+    "chien",
+    "chiens"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "autoconstruction",
+   "nom": "Autoconstruction",
+   "famille": "quotidien",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "autoconstruction",
+    "auto-construction",
+    "maison en bois",
+    "construire sa maison",
+    "tiny house",
+    "permis de construire",
+    "ossature bois"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "jardinage",
+   "nom": "Jardinage et potager",
+   "famille": "quotidien",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "jardinage",
+    "jardinier",
+    "jardiniers",
+    "jardiniere",
+    "potager",
+    "potagers",
+    "semis",
+    "tondeuse",
+    "pelouse",
+    "au jardin"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "bricolage",
+   "nom": "Bricolage",
+   "famille": "quotidien",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "bricolage",
+    "bricoler",
+    "diy",
+    "renovation",
+    "perceuse",
+    "outillage"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "ecologie-quotidien",
+   "nom": "Écologie au quotidien",
+   "famille": "quotidien",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "zero dechet",
+    "recyclage",
+    "compost",
+    "seconde main",
+    "sobriete",
+    "ecogestes"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "chiens",
+   "nom": "Chiens",
+   "famille": "quotidien",
+   "large": false,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "chien",
+    "chiens",
+    "chiot",
+    "chiots",
+    "canin",
+    "canine",
+    "toutou"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "cafe",
+   "nom": "Café et barista",
+   "famille": "quotidien",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "cafe de specialite",
+    "barista",
+    "expresso",
+    "espresso",
+    "cappuccino",
+    "machine a cafe",
+    "torrefacteur",
+    "torrefaction"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "cuisine",
+   "nom": "Cuisine",
+   "famille": "quotidien",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "recette",
+    "recettes",
+    "cuisine",
+    "gastronomie",
+    "patisserie"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "biere",
+   "nom": "Bière artisanale",
+   "famille": "quotidien",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "biere",
+    "bieres",
+    "brasserie artisanale",
+    "brasseur",
+    "microbrasserie"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "vin",
+   "nom": "Vin",
+   "famille": "quotidien",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "vin",
+    "vins",
+    "viticulteur",
+    "viticulteurs",
+    "vignoble",
+    "vendanges",
+    "sommelier",
+    "muscadet"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "velo",
+   "nom": "Vélo et mobilité",
+   "famille": "quotidien",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "velo",
+    "velos",
+    "cyclistes",
+    "piste cyclable",
+    "trottinette",
+    "mobilite douce",
+    "covoiturage"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "voyage",
+   "nom": "Tout le voyage",
+   "famille": "voyage",
+   "large": true,
+   "defaut": true,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "voyage",
+    "voyages",
+    "voyager",
+    "tourisme",
+    "touristes",
+    "vacances",
+    "compagnie aerienne",
+    "billet d'avion"
+   ],
+   "exclure": [
+    "voyager 1",
+    "voyager 2",
+    "sonde voyager"
+   ]
+  },
+  {
+   "id": "japon",
+   "nom": "Japon",
+   "famille": "voyage",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "japon",
+    "tokyo",
+    "kyoto",
+    "osaka",
+    "hokkaido"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "amerique-latine",
+   "nom": "Amérique latine",
+   "famille": "voyage",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "amerique latine",
+    "amerique du sud",
+    "argentine",
+    "bresil",
+    "chili",
+    "perou",
+    "bolivie",
+    "colombie",
+    "mexique"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "grece",
+   "nom": "Grèce",
+   "famille": "voyage",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "grece",
+    "athenes",
+    "crete",
+    "cyclades"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "italie",
+   "nom": "Italie",
+   "famille": "voyage",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "italie",
+    "rome",
+    "naples",
+    "venise",
+    "sicile",
+    "toscane"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "egypte",
+   "nom": "Égypte",
+   "famille": "voyage",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "egypte",
+    "le caire",
+    "pyramides",
+    "louxor"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "histoire",
+   "nom": "Histoire",
+   "famille": "voyage",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "historien",
+    "historienne",
+    "moyen age",
+    "antiquite",
+    "guerre mondiale",
+    "revolution francaise"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "patrimoine",
+   "nom": "Patrimoine et musées",
+   "famille": "voyage",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "patrimoine",
+    "musee",
+    "musees",
+    "monument historique",
+    "journees du patrimoine"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "insolite",
+   "nom": "Insolite",
+   "famille": "voyage",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "insolite",
+    "improbable",
+    "record du monde",
+    "guinness"
+   ],
+   "exclure": []
+  },
+  {
+   "id": "sport",
+   "nom": "Sport",
+   "famille": "voyage",
+   "large": false,
+   "defaut": false,
+   "google": true,
+   "tout_specialistes": false,
+   "tout_generalistes": false,
+   "mots": [
+    "sport",
+    "football",
+    "rugby",
+    "tennis",
+    "basket",
+    "cyclisme",
+    "jeux olympiques",
+    "ligue 1",
+    "coupe du monde",
+    "handball",
+    "formule 1"
+   ],
+   "exclure": []
+  }
+ ]
+}

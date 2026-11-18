@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Flow Actu</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📰</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <a class="logo" href="#" data-go="pourvous">📰 Flow <span>Actu</span></a>
+  <label class="search"><span class="sr">Rechercher</span>
+    <input id="q" type="search" placeholder="Rechercher dans mes actus…" autocomplete="off"></label>
+  <button class="icon" id="theme" title="Mode clair / sombre" aria-label="Mode clair ou sombre">🌓</button>
+  <button class="icon" id="reglages" title="Réglages" aria-label="Réglages">⚙️</button>
+</header>
+<nav id="tabs" class="tabs" aria-label="Rubriques"></nav>
+<main class="layout">
+  <section id="content"><p class="empty">Chargement…</p></section>
+  <aside id="side"></aside>
+</main>
+<script src="logique.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
