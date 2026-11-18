@@ -1,0 +1,55 @@
+name: Flow Actu — mise à jour
+
+on:
+  schedule:
+    - cron: "41 */3 * * *"      # toutes les 3 heures (heure UTC), à la minute 41
+  workflow_dispatch:             # bouton « Run workflow » pour lancer à la main
+  push:
+    branches: [main]
+    paths: ["config/**", "site/**", "robot/**", ".github/workflows/flow-actu.yml"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: flow-actu
+  cancel-in-progress: false
+
+jobs:
+  robot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Vérifier le robot et la page (tests automatiques)
+        run: |
+          python3 -m unittest discover -s tests
+          node --test tests/test_page.js
+
+      - name: Récupérer les actus
+        run: python3 robot/flow_actu.py
+
+      - name: Préparer le site
+        run: |
+          mkdir -p _site/data
+          cp site/* _site/
+          cp -r config _site/config
+          cp data/news.json _site/data/
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  publication:
+    needs: robot
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v5
