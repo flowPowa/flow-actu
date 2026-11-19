@@ -27,13 +27,15 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 from html import unescape
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UA = "Mozilla/5.0 (compatible; FlowActu/1.0; +https://github.com/{depot})"
 PAUSE = 1.0
-PAUSE_GOOGLE = 1.5
+PAUSE_GOOGLE = 3.0
 NOW = datetime.now(timezone.utc)
+PARIS = ZoneInfo("Europe/Paris")
 
 
 # ====================================================================== outils texte
@@ -407,7 +409,9 @@ def group_articles(articles, min_common=3, min_overlap=0.4, window_h=48):
 
 
 # ====================================================================== fusion et plafond
-def cap_per_category(articles, max_n):
+def cap_per_category(articles, max_n, max_per_media=None):
+    """Garde au plus max_n articles par catégorie, les plus récents, avec au plus max_per_media
+    articles d'un même média. Si la catégorie manque d'autres sources, on la complète quand même."""
     by_cat = {}
     for a in articles:
         for c in a["c"]:
@@ -415,7 +419,18 @@ def cap_per_category(articles, max_n):
     keep = {}
     for c, lst in by_cat.items():
         lst.sort(key=lambda a: a["d"], reverse=True)
-        for a in lst[:max_n]:
+        chosen, extra, per_media = [], [], {}
+        for a in lst:
+            key = a.get("m") or a.get("s") or "?"
+            if max_per_media and per_media.get(key, 0) >= max_per_media:
+                extra.append(a)
+                continue
+            per_media[key] = per_media.get(key, 0) + 1
+            chosen.append(a)
+            if len(chosen) >= max_n:
+                break
+        chosen += extra[: max(0, max_n - len(chosen))]
+        for a in chosen:
             keep.setdefault(a["id"], set()).add(c)
     out = []
     for a in articles:
@@ -423,6 +438,46 @@ def cap_per_category(articles, max_n):
             a["c"] = [c for c in a["c"] if c in keep[a["id"]]]
             out.append(a)
     return out
+
+
+# ====================================================================== créneaux de mise à jour
+def current_slot(now_paris, creneaux):
+    """Heure de début du créneau en cours (ou None si on est hors créneau)."""
+    for h in creneaux["heures_paris"]:
+        start = now_paris.replace(hour=h, minute=0, second=0, microsecond=0)
+        if start <= now_paris < start + timedelta(hours=creneaux["fenetre_heures"]):
+            return start
+    return None
+
+
+def should_run(event, now_utc, creneaux, last_generated_iso):
+    """(lancer ?, raison). Lancement manuel ou modification du dépôt : toujours.
+    Lancement programmé : seulement dans un créneau, et une seule fois par créneau."""
+    if event != "schedule":
+        return True, f"lancement « {event} » : mise à jour forcée"
+    now_paris = now_utc.astimezone(PARIS)
+    slot = current_slot(now_paris, creneaux)
+    if slot is None:
+        return False, f"{now_paris:%H:%M} (Paris) : hors créneau"
+    if last_generated_iso:
+        try:
+            last = datetime.fromisoformat(last_generated_iso).astimezone(PARIS)
+            if last >= slot:
+                return False, f"créneau de {slot:%Hh} déjà fait (mise à jour de {last:%H:%M})"
+        except ValueError:
+            pass
+    return True, f"créneau de {slot:%Hh} : mise à jour"
+
+
+def slot_index(now_utc, creneaux):
+    """Numéro du créneau (0, 1, 2…) pour répartir les recherches Google sur la journée."""
+    hours = creneaux["heures_paris"]
+    h = now_utc.astimezone(PARIS).hour
+    idx = 0
+    for i, start in enumerate(hours):
+        if h >= start:
+            idx = i
+    return idx
 
 
 # ====================================================================== météo
@@ -496,8 +551,8 @@ def run(net, cfg, sleep=time.sleep, out_path=None, write_summary=False):
             rapport["flux_ok"].append(m["nom"])
 
     # ---- 2. Google Actualités
-    rotation = max(1, site["google"]["rotation_non_cochees"])
-    slot = (NOW.hour // 3) % rotation
+    rotation = max(1, len(site["creneaux"]["heures_paris"]))  # catégories non cochées : 1 fois par jour
+    slot = slot_index(NOW, site["creneaux"])
     targets = []
     for i, c in enumerate([c for c in cats if c["google"]]):
         if c["defaut"] or i % rotation == slot:
@@ -573,7 +628,7 @@ def run(net, cfg, sleep=time.sleep, out_path=None, write_summary=False):
             articles.append(a)
 
     # ---- 6. plafond par catégorie
-    articles = cap_per_category(articles, site["max_par_categorie"])
+    articles = cap_per_category(articles, site["max_par_categorie"], site.get("max_par_media"))
 
     # ---- 7. statut payant des nouveaux articles
     todo = [a for a in articles if a.get("new") and a["u"] and "news.google.com" not in a["u"]]

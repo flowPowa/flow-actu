@@ -10,6 +10,17 @@
   };
 
   let CFG = null, DATA = null, S = null, VIEW = [], current = "pourvous", catFilter = "", mediaFilter = "", flash = "";
+  const POS_KEY = "flowactu-position";
+  const fromHash = () => decodeURIComponent(location.hash.slice(1)) || "pourvous";
+  function go(view) {
+    if (fromHash() === view) { current = view; render(); scrollTo({ top: 0 }); }
+    else location.hash = view; // le changement d'adresse déclenche l'affichage (et entre dans l'historique)
+  }
+  function savePos() { try { sessionStorage.setItem(POS_KEY, JSON.stringify({ v: current, y: Math.round(scrollY) })); } catch (e) {} }
+  function restorePos() {
+    let p = null; try { p = JSON.parse(sessionStorage.getItem(POS_KEY)); } catch (e) {}
+    if (p && p.v === current && p.y > 0) requestAnimationFrame(() => scrollTo(0, p.y));
+  }
 
   /* ---------------------------------------------------------------- utilitaires */
   function save() { store.set(S); }
@@ -109,7 +120,7 @@
 
   function render() {
     VIEW = FA.computeView(DATA, CFG, S);
-    if (current !== "pourvous" && current !== "reglages" && !VIEW.some((b) => b.id === current)) current = "pourvous";
+    if (current !== "pourvous" && current !== "reglages" && !VIEW.some((b) => b.id === current)) { current = "pourvous"; history.replaceState(null, "", "#pourvous"); }
     renderTabs(); renderContent(); renderSide();
   }
 
@@ -186,10 +197,11 @@
 
   /* ---------------------------------------------------------------- évènements */
   document.addEventListener("click", (e) => {
-    const go = e.target.closest("[data-go]");
-    if (go) { e.preventDefault(); current = go.dataset.go; $("#q").value = ""; flash = ""; render(); scrollTo({ top: 0 }); return; }
+    const goEl = e.target.closest("[data-go]");
+    if (goEl) { e.preventDefault(); $("#q").value = ""; flash = ""; go(goEl.dataset.go); return; }
     const rd = e.target.closest("[data-read]");
     if (rd) {
+      savePos();
       if (!S.lus.includes(rd.dataset.read)) { S.lus.push(rd.dataset.read); S.lus = S.lus.slice(-3000); save(); }
       const art = rd.closest(".article"); if (art && rd.classList.contains("t")) art.classList.add("read");
       return;
@@ -263,7 +275,11 @@
   $("#theme").addEventListener("click", () => {
     S.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; save(); applyTheme();
   });
-  $("#reglages").addEventListener("click", () => { current = current === "reglages" ? "pourvous" : "reglages"; flash = ""; render(); scrollTo({ top: 0 }); });
+  $("#reglages").addEventListener("click", () => { flash = ""; if (current === "reglages") history.back(); else go("reglages"); });
+  window.addEventListener("hashchange", () => { current = fromHash(); flash = ""; if (DATA) { render(); scrollTo({ top: 0 }); } });
+  window.addEventListener("pagehide", savePos);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") savePos(); });
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 
   /* ---------------------------------------------------------------- chargement */
   const get = (p) => fetch(p + "?t=" + Date.now()).then((r) => { if (!r.ok) throw new Error(p + " : " + r.status); return r.json(); });
@@ -273,7 +289,7 @@
       DATA = data;
       S = FA.mergeSettings(CFG, store.get());
       document.title = site.titre;
-      applyTheme(); render();
+      current = fromHash(); applyTheme(); render(); restorePos();
       setInterval(() => { if (current !== "reglages" && !$("#q").value) renderContent(); }, 60000);
     })
     .catch((err) => {

@@ -256,3 +256,51 @@ class PassageComplet(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ---------------------------------------------------------------- correctifs du 19/11
+class Diversite(unittest.TestCase):
+    def test_3_par_media_max(self):
+        base = datetime(2026, 11, 19, tzinfo=timezone.utc)
+        arts = [{"id": f"p{i}", "t": "t", "m": "le-parisien", "d": (base + timedelta(minutes=100 + i)).isoformat(), "c": ["a-la-une"]} for i in range(40)]
+        arts += [{"id": f"o{i}", "t": "t", "m": f"autre{i}", "d": (base + timedelta(minutes=i)).isoformat(), "c": ["a-la-une"]} for i in range(10)]
+        out = R.cap_per_category(arts, 30, 3)
+        self.assertEqual(len(out), 30)
+        self.assertEqual(sum(1 for a in out if a["m"].startswith("autre")), 10)
+        # 10 autres médias gardés ; le Parisien complète les places restantes (20) faute d'autres sources
+        self.assertEqual(sum(1 for a in out if a["m"] == "le-parisien"), 20)
+
+    def test_le_parisien_ne_monopolise_plus(self):
+        base = datetime(2026, 11, 19, tzinfo=timezone.utc)
+        arts = [{"id": f"p{i}", "t": "t", "m": "le-parisien", "d": (base + timedelta(minutes=100 + i)).isoformat(), "c": ["a-la-une"]} for i in range(40)]
+        arts += [{"id": f"o{i}", "t": "t", "m": f"autre{i % 15}", "d": (base + timedelta(minutes=i)).isoformat(), "c": ["a-la-une"]} for i in range(45)]
+        out = R.cap_per_category(arts, 30, 3)
+        self.assertEqual(sum(1 for a in out if a["m"] == "le-parisien"), 3)
+
+
+class Creneaux(unittest.TestCase):
+    C = {"heures_paris": [8, 14, 20], "fenetre_heures": 2}
+    U = lambda self, s: datetime.fromisoformat(s)
+
+    def test_hors_creneau(self):
+        self.assertFalse(R.should_run("schedule", self.U("2026-11-19T10:30:00+00:00"), self.C, None)[0])  # 11 h 30 Paris
+
+    def test_premier_passage_du_creneau(self):
+        ok, why = R.should_run("schedule", self.U("2026-11-19T07:15:00+00:00"), self.C, "2026-11-18T19:05:00+00:00")
+        self.assertTrue(ok, why)  # 8 h 15 Paris, dernière mise à jour hier 20 h 05
+
+    def test_creneau_deja_fait(self):
+        self.assertFalse(R.should_run("schedule", self.U("2026-11-19T07:45:00+00:00"), self.C, "2026-11-19T07:15:00+00:00")[0])
+
+    def test_heure_d_ete(self):
+        self.assertTrue(R.should_run("schedule", self.U("2026-07-01T06:10:00+00:00"), self.C, "2026-06-30T18:30:00+00:00")[0])  # 8 h 10 Paris (été)
+        self.assertFalse(R.should_run("schedule", self.U("2026-07-01T05:50:00+00:00"), self.C, None)[0])  # 7 h 50 Paris
+
+    def test_lancement_manuel_toujours(self):
+        self.assertTrue(R.should_run("workflow_dispatch", self.U("2026-11-19T03:00:00+00:00"), self.C, "2026-11-19T02:59:00+00:00")[0])
+        self.assertTrue(R.should_run("push", self.U("2026-11-19T03:00:00+00:00"), self.C, None)[0])
+
+    def test_repartition_google(self):
+        self.assertEqual(R.slot_index(self.U("2026-11-19T07:15:00+00:00"), self.C), 0)
+        self.assertEqual(R.slot_index(self.U("2026-11-19T13:15:00+00:00"), self.C), 1)
+        self.assertEqual(R.slot_index(self.U("2026-11-19T19:15:00+00:00"), self.C), 2)

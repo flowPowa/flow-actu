@@ -6,7 +6,7 @@ Le cahier des charges complet est dans le projet Claude « Perso » (`flow-actu-
 
 ## Comment ça marche
 
-- Un **robot** (GitHub Actions) tourne toutes les 3 heures. Il lit les flux RSS des médias, complète avec Google Actualités, range les articles par catégorie, regroupe les articles qui parlent du même sujet, repère les articles payants et publie le tout.
+- Un **robot** (GitHub Actions) tourne trois fois par jour, vers 8 h, 14 h et 20 h (heure de Paris). Il lit les flux RSS des médias, complète avec Google Actualités, range les articles par catégorie, regroupe les articles qui parlent du même sujet, repère les articles payants et publie le tout.
 - La **page** affiche les catégories que vous cochez, avec vos filtres. Vos réglages restent dans votre navigateur, jamais sur GitHub.
 
 ```
@@ -29,7 +29,7 @@ tests/                     ← les tests automatiques (lancés avant chaque mise
 4. **Premier lancement** : onglet **Actions** → **Flow Actu — mise à jour** (colonne de gauche) → bouton **Run workflow** → bouton vert. Comptez 10 à 15 minutes.
 5. **C'est en ligne** : https://flowpowa.github.io/flow-actu/
 
-Ensuite, le robot se relance tout seul toutes les 3 heures. Le premier passage ne contient que les articles du moment ; la page s'enrichit au fil des passages (le robot garde les articles précédents, dans la limite de 30 par catégorie).
+Ensuite, le robot se relance tout seul vers 8 h, 14 h et 20 h. GitHub lance des essais toutes les 15 minutes autour de ces heures, car ses lancements programmés sont souvent retardés ou sautés ; un « portier » (`robot/creneau.py`) ne laisse passer que le premier essai de chaque créneau, les autres s'arrêtent en quelques secondes (ils apparaissent quand même dans l'onglet Actions, c'est normal). Le bouton « Run workflow » force une mise à jour à tout moment. Le premier passage ne contient que les articles du moment ; la page s'enrichit au fil des passages (le robot garde les articles précédents, dans la limite de 30 par catégorie).
 
 ## Utilisation
 
@@ -44,7 +44,7 @@ Tout se règle dans la page, bouton ⚙️ :
 ### Ajouter un nouveau média au robot
 1. Dans la page : ⚙️ → Médias → **Ajouter un site** (ex. `exemple.fr`) → Favori ou Neutre → Ajouter.
 2. Cliquez **Ajouter au robot** : GitHub s'ouvre avec un fichier déjà rempli → **Commit changes**.
-3. Au passage suivant (3 h maximum), le robot cherche tout seul le flux du site. S'il n'en trouve pas, il le signale dans son rapport.
+3. Au passage suivant (créneau de 8 h, 14 h ou 20 h), le robot cherche tout seul le flux du site. S'il n'en trouve pas, il le signale dans son rapport.
 
 ### Voir le rapport du robot
 Onglet **Actions** → dernière exécution → **Summary** : nombre d'articles, flux en erreur, état de Google, articles par catégorie.
