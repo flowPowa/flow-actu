@@ -2,8 +2,11 @@ name: Flow Actu — mise à jour
 
 on:
   schedule:
-    - cron: "41 */3 * * *"      # toutes les 3 heures (heure UTC), à la minute 41
-  workflow_dispatch:             # bouton « Run workflow » pour lancer à la main
+    # Toutes les 15 minutes pendant 3 plages (heure UTC) qui couvrent 8 h, 14 h et 20 h à Paris,
+    # en heure d'été comme en heure d'hiver. Le « portier » (robot/creneau.py) ne laisse passer
+    # que le premier essai de chaque créneau : les autres s'arrêtent en quelques secondes.
+    - cron: "*/15 6-8,12-14,18-20 * * *"
+  workflow_dispatch:             # bouton « Run workflow » : mise à jour forcée
   push:
     branches: [main]
     paths: ["config/**", "site/**", "robot/**", ".github/workflows/flow-actu.yml"]
@@ -21,31 +24,45 @@ jobs:
   robot:
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    outputs:
+      lancer: ${{ steps.creneau.outputs.lancer }}
     steps:
       - uses: actions/checkout@v5
 
+      - name: Portier — faut-il mettre à jour maintenant ?
+        id: creneau
+        env:
+          EVENEMENT: ${{ github.event_name }}
+        run: python3 robot/creneau.py
+
       - name: Vérifier le robot et la page (tests automatiques)
+        if: steps.creneau.outputs.lancer == 'true'
         run: |
           python3 -m unittest discover -s tests
           node --test tests/test_page.js
 
       - name: Récupérer les actus
+        if: steps.creneau.outputs.lancer == 'true'
         run: python3 robot/flow_actu.py
 
       - name: Préparer le site
+        if: steps.creneau.outputs.lancer == 'true'
         run: |
           mkdir -p _site/data
           cp site/* _site/
           cp -r config _site/config
           cp data/news.json _site/data/
 
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
+        if: steps.creneau.outputs.lancer == 'true'
       - uses: actions/upload-pages-artifact@v5
+        if: steps.creneau.outputs.lancer == 'true'
         with:
           path: _site
 
   publication:
     needs: robot
+    if: needs.robot.outputs.lancer == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
